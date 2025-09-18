@@ -1,1 +1,1 @@
-::: harp.devices.rgbarray.harpdevice
+::: harp.devices.rgbarray

@@ -1,1 +1,1 @@
-::: harp.devices.cameracontroller.harpdevice
+::: harp.devices.cameracontroller

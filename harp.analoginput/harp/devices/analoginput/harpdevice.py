@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 @dataclass
 class AnalogDataPayload:
@@ -64,7 +63,7 @@ class DigitalOutputs(IntFlag):
     DO4_CHANGED = 0x80
 
 
-class RangeAndFilterConfig(Enum):
+class RangeAndFilterConfig(IntEnum):
     """
     Available settings to set the range (Volt) and LowPass filter cutoff (Hz) of the ADC.
 
@@ -110,7 +109,7 @@ class RangeAndFilterConfig(Enum):
     RANGE_10V_LOW_PASS_22000HZ = 17
 
 
-class SamplingRateMode(Enum):
+class SamplingRateMode(IntEnum):
     """
     Available sampling frequency settings of the ADC.
 
@@ -126,7 +125,7 @@ class SamplingRateMode(Enum):
     SAMPLING_RATE_2000HZ = 1
 
 
-class TriggerConfig(Enum):
+class TriggerConfig(IntEnum):
     """
     Available configurations for when using DI0 as an acquisition trigger.
 
@@ -148,7 +147,7 @@ class TriggerConfig(Enum):
     SAMPLE_ON_RISING_EDGE = 3
 
 
-class SyncConfig(Enum):
+class SyncConfig(IntEnum):
     """
     Available configurations when using DO0 pin to report firmware events.
 
@@ -167,7 +166,7 @@ class SyncConfig(Enum):
     PULSE = 2
 
 
-class StartSyncOutputTarget(Enum):
+class StartSyncOutputTarget(IntEnum):
     """
     Available digital output pins that are able to be triggered on acquisition start.
 
@@ -192,7 +191,7 @@ class StartSyncOutputTarget(Enum):
     DO3 = 4
 
 
-class AdcChannel(Enum):
+class AdcChannel(IntEnum):
     """
     Available target analog channels to be targeted for threshold events.
 
@@ -217,7 +216,7 @@ class AdcChannel(Enum):
     NONE = 8
 
 
-class AnalogInputRegisters(Enum):
+class AnalogInputRegisters(IntEnum):
     """Enum for all available registers in the AnalogInput device.
 
     Attributes
@@ -281,6 +280,7 @@ class AnalogInputRegisters(Enum):
     DO3_TIME_BELOW_THRESHOLD : int
         Time (ms) below threshold value that is required to trigger a DO3 pin event.
     """
+
     ACQUISITION_STATE = 32
     ANALOG_DATA = 33
     DIGITAL_INPUT_STATE = 34
@@ -335,14 +335,15 @@ class AnalogInput(Device):
         bool
             Value read from the AcquisitionState register.
         """
-        address = 32
+        address = AnalogInputRegisters.ACQUISITION_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("AcquisitionState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AcquisitionState")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_acquisition_state(self, value: bool):
+    def write_acquisition_state(self, value: bool) -> ReplyHarpMessage | None:
         """
         Writes a value to the AcquisitionState register.
 
@@ -351,10 +352,13 @@ class AnalogInput(Device):
         value : bool
             Value to write to the AcquisitionState register.
         """
-        address = 32
+        address = AnalogInputRegisters.ACQUISITION_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("AcquisitionState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AcquisitionState")
+
+        return reply
+
     def read_analog_data(self) -> AnalogDataPayload:
         """
         Reads the contents of the AnalogData register.
@@ -364,12 +368,19 @@ class AnalogInput(Device):
         AnalogDataPayload
             Value read from the AnalogData register.
         """
-        address = 33
+        address = AnalogInputRegisters.ANALOG_DATA
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("AnalogData", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AnalogData")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return AnalogDataPayload(
+            Channel0=payload[0],
+            Channel1=payload[1],
+            Channel2=payload[2],
+            Channel3=payload[3]
+        )
 
     def read_digital_input_state(self) -> DigitalInputs:
         """
@@ -380,12 +391,12 @@ class AnalogInput(Device):
         DigitalInputs
             Value read from the DigitalInputState register.
         """
-        address = 34
+        address = AnalogInputRegisters.DIGITAL_INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_range_and_filter(self) -> RangeAndFilterConfig:
         """
@@ -396,14 +407,14 @@ class AnalogInput(Device):
         RangeAndFilterConfig
             Value read from the RangeAndFilter register.
         """
-        address = 37
+        address = AnalogInputRegisters.RANGE_AND_FILTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("RangeAndFilter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("RangeAndFilter")
 
-        return reply.payload
+        return RangeAndFilterConfig(reply.payload)
 
-    def write_range_and_filter(self, value: RangeAndFilterConfig):
+    def write_range_and_filter(self, value: RangeAndFilterConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the RangeAndFilter register.
 
@@ -412,10 +423,13 @@ class AnalogInput(Device):
         value : RangeAndFilterConfig
             Value to write to the RangeAndFilter register.
         """
-        address = 37
+        address = AnalogInputRegisters.RANGE_AND_FILTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("RangeAndFilter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("RangeAndFilter")
+
+        return reply
+
     def read_sampling_rate(self) -> SamplingRateMode:
         """
         Reads the contents of the SamplingRate register.
@@ -425,14 +439,14 @@ class AnalogInput(Device):
         SamplingRateMode
             Value read from the SamplingRate register.
         """
-        address = 38
+        address = AnalogInputRegisters.SAMPLING_RATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("SamplingRate", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("SamplingRate")
 
-        return reply.payload
+        return SamplingRateMode(reply.payload)
 
-    def write_sampling_rate(self, value: SamplingRateMode):
+    def write_sampling_rate(self, value: SamplingRateMode) -> ReplyHarpMessage | None:
         """
         Writes a value to the SamplingRate register.
 
@@ -441,10 +455,13 @@ class AnalogInput(Device):
         value : SamplingRateMode
             Value to write to the SamplingRate register.
         """
-        address = 38
+        address = AnalogInputRegisters.SAMPLING_RATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("SamplingRate", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("SamplingRate")
+
+        return reply
+
     def read_di0_trigger(self) -> TriggerConfig:
         """
         Reads the contents of the DI0Trigger register.
@@ -454,14 +471,14 @@ class AnalogInput(Device):
         TriggerConfig
             Value read from the DI0Trigger register.
         """
-        address = 39
+        address = AnalogInputRegisters.DI0_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DI0Trigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DI0Trigger")
 
-        return reply.payload
+        return TriggerConfig(reply.payload)
 
-    def write_di0_trigger(self, value: TriggerConfig):
+    def write_di0_trigger(self, value: TriggerConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the DI0Trigger register.
 
@@ -470,10 +487,13 @@ class AnalogInput(Device):
         value : TriggerConfig
             Value to write to the DI0Trigger register.
         """
-        address = 39
+        address = AnalogInputRegisters.DI0_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DI0Trigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DI0Trigger")
+
+        return reply
+
     def read_do0_sync(self) -> SyncConfig:
         """
         Reads the contents of the DO0Sync register.
@@ -483,14 +503,14 @@ class AnalogInput(Device):
         SyncConfig
             Value read from the DO0Sync register.
         """
-        address = 40
+        address = AnalogInputRegisters.DO0_SYNC
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0Sync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0Sync")
 
-        return reply.payload
+        return SyncConfig(reply.payload)
 
-    def write_do0_sync(self, value: SyncConfig):
+    def write_do0_sync(self, value: SyncConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0Sync register.
 
@@ -499,10 +519,13 @@ class AnalogInput(Device):
         value : SyncConfig
             Value to write to the DO0Sync register.
         """
-        address = 40
+        address = AnalogInputRegisters.DO0_SYNC
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0Sync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0Sync")
+
+        return reply
+
     def read_do0_pulse_width(self) -> int:
         """
         Reads the contents of the DO0PulseWidth register.
@@ -512,14 +535,15 @@ class AnalogInput(Device):
         int
             Value read from the DO0PulseWidth register.
         """
-        address = 41
+        address = AnalogInputRegisters.DO0_PULSE_WIDTH
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0PulseWidth", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0PulseWidth")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do0_pulse_width(self, value: int):
+    def write_do0_pulse_width(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0PulseWidth register.
 
@@ -528,10 +552,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO0PulseWidth register.
         """
-        address = 41
+        address = AnalogInputRegisters.DO0_PULSE_WIDTH
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0PulseWidth", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0PulseWidth")
+
+        return reply
+
     def read_digital_output_set(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputSet register.
@@ -541,14 +568,14 @@ class AnalogInput(Device):
         DigitalOutputs
             Value read from the DigitalOutputSet register.
         """
-        address = 42
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputSet")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_set(self, value: DigitalOutputs):
+    def write_digital_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputSet register.
 
@@ -557,10 +584,13 @@ class AnalogInput(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputSet register.
         """
-        address = 42
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputSet")
+
+        return reply
+
     def read_digital_output_clear(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputClear register.
@@ -570,14 +600,14 @@ class AnalogInput(Device):
         DigitalOutputs
             Value read from the DigitalOutputClear register.
         """
-        address = 43
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputClear")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_clear(self, value: DigitalOutputs):
+    def write_digital_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputClear register.
 
@@ -586,10 +616,13 @@ class AnalogInput(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputClear register.
         """
-        address = 43
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputClear")
+
+        return reply
+
     def read_digital_output_toggle(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputToggle register.
@@ -599,14 +632,14 @@ class AnalogInput(Device):
         DigitalOutputs
             Value read from the DigitalOutputToggle register.
         """
-        address = 44
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputToggle")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_toggle(self, value: DigitalOutputs):
+    def write_digital_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputToggle register.
 
@@ -615,10 +648,13 @@ class AnalogInput(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputToggle register.
         """
-        address = 44
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputToggle")
+
+        return reply
+
     def read_digital_output_state(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputState register.
@@ -628,14 +664,14 @@ class AnalogInput(Device):
         DigitalOutputs
             Value read from the DigitalOutputState register.
         """
-        address = 45
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputState")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_state(self, value: DigitalOutputs):
+    def write_digital_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputState register.
 
@@ -644,10 +680,13 @@ class AnalogInput(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputState register.
         """
-        address = 45
+        address = AnalogInputRegisters.DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputState")
+
+        return reply
+
     def read_sync_output(self) -> StartSyncOutputTarget:
         """
         Reads the contents of the SyncOutput register.
@@ -657,14 +696,14 @@ class AnalogInput(Device):
         StartSyncOutputTarget
             Value read from the SyncOutput register.
         """
-        address = 48
+        address = AnalogInputRegisters.SYNC_OUTPUT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("SyncOutput", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("SyncOutput")
 
-        return reply.payload
+        return StartSyncOutputTarget(reply.payload)
 
-    def write_sync_output(self, value: StartSyncOutputTarget):
+    def write_sync_output(self, value: StartSyncOutputTarget) -> ReplyHarpMessage | None:
         """
         Writes a value to the SyncOutput register.
 
@@ -673,10 +712,13 @@ class AnalogInput(Device):
         value : StartSyncOutputTarget
             Value to write to the SyncOutput register.
         """
-        address = 48
+        address = AnalogInputRegisters.SYNC_OUTPUT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("SyncOutput", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("SyncOutput")
+
+        return reply
+
     def read_do0_target_channel(self) -> AdcChannel:
         """
         Reads the contents of the DO0TargetChannel register.
@@ -686,14 +728,14 @@ class AnalogInput(Device):
         AdcChannel
             Value read from the DO0TargetChannel register.
         """
-        address = 58
+        address = AnalogInputRegisters.DO0_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0TargetChannel")
 
-        return reply.payload
+        return AdcChannel(reply.payload)
 
-    def write_do0_target_channel(self, value: AdcChannel):
+    def write_do0_target_channel(self, value: AdcChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0TargetChannel register.
 
@@ -702,10 +744,13 @@ class AnalogInput(Device):
         value : AdcChannel
             Value to write to the DO0TargetChannel register.
         """
-        address = 58
+        address = AnalogInputRegisters.DO0_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0TargetChannel")
+
+        return reply
+
     def read_do1_target_channel(self) -> AdcChannel:
         """
         Reads the contents of the DO1TargetChannel register.
@@ -715,14 +760,14 @@ class AnalogInput(Device):
         AdcChannel
             Value read from the DO1TargetChannel register.
         """
-        address = 59
+        address = AnalogInputRegisters.DO1_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO1TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1TargetChannel")
 
-        return reply.payload
+        return AdcChannel(reply.payload)
 
-    def write_do1_target_channel(self, value: AdcChannel):
+    def write_do1_target_channel(self, value: AdcChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1TargetChannel register.
 
@@ -731,10 +776,13 @@ class AnalogInput(Device):
         value : AdcChannel
             Value to write to the DO1TargetChannel register.
         """
-        address = 59
+        address = AnalogInputRegisters.DO1_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1TargetChannel")
+
+        return reply
+
     def read_do2_target_channel(self) -> AdcChannel:
         """
         Reads the contents of the DO2TargetChannel register.
@@ -744,14 +792,14 @@ class AnalogInput(Device):
         AdcChannel
             Value read from the DO2TargetChannel register.
         """
-        address = 60
+        address = AnalogInputRegisters.DO2_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO2TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2TargetChannel")
 
-        return reply.payload
+        return AdcChannel(reply.payload)
 
-    def write_do2_target_channel(self, value: AdcChannel):
+    def write_do2_target_channel(self, value: AdcChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2TargetChannel register.
 
@@ -760,10 +808,13 @@ class AnalogInput(Device):
         value : AdcChannel
             Value to write to the DO2TargetChannel register.
         """
-        address = 60
+        address = AnalogInputRegisters.DO2_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2TargetChannel")
+
+        return reply
+
     def read_do3_target_channel(self) -> AdcChannel:
         """
         Reads the contents of the DO3TargetChannel register.
@@ -773,14 +824,14 @@ class AnalogInput(Device):
         AdcChannel
             Value read from the DO3TargetChannel register.
         """
-        address = 61
+        address = AnalogInputRegisters.DO3_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO3TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3TargetChannel")
 
-        return reply.payload
+        return AdcChannel(reply.payload)
 
-    def write_do3_target_channel(self, value: AdcChannel):
+    def write_do3_target_channel(self, value: AdcChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3TargetChannel register.
 
@@ -789,10 +840,13 @@ class AnalogInput(Device):
         value : AdcChannel
             Value to write to the DO3TargetChannel register.
         """
-        address = 61
+        address = AnalogInputRegisters.DO3_TARGET_CHANNEL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3TargetChannel", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3TargetChannel")
+
+        return reply
+
     def read_do0_threshold(self) -> int:
         """
         Reads the contents of the DO0Threshold register.
@@ -802,14 +856,15 @@ class AnalogInput(Device):
         int
             Value read from the DO0Threshold register.
         """
-        address = 66
+        address = AnalogInputRegisters.DO0_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO0Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do0_threshold(self, value: int):
+    def write_do0_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0Threshold register.
 
@@ -818,10 +873,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO0Threshold register.
         """
-        address = 66
+        address = AnalogInputRegisters.DO0_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0Threshold")
+
+        return reply
+
     def read_do1_threshold(self) -> int:
         """
         Reads the contents of the DO1Threshold register.
@@ -831,14 +889,15 @@ class AnalogInput(Device):
         int
             Value read from the DO1Threshold register.
         """
-        address = 67
+        address = AnalogInputRegisters.DO1_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO1Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do1_threshold(self, value: int):
+    def write_do1_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1Threshold register.
 
@@ -847,10 +906,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO1Threshold register.
         """
-        address = 67
+        address = AnalogInputRegisters.DO1_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1Threshold")
+
+        return reply
+
     def read_do2_threshold(self) -> int:
         """
         Reads the contents of the DO2Threshold register.
@@ -860,14 +922,15 @@ class AnalogInput(Device):
         int
             Value read from the DO2Threshold register.
         """
-        address = 68
+        address = AnalogInputRegisters.DO2_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO2Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do2_threshold(self, value: int):
+    def write_do2_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2Threshold register.
 
@@ -876,10 +939,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO2Threshold register.
         """
-        address = 68
+        address = AnalogInputRegisters.DO2_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2Threshold")
+
+        return reply
+
     def read_do3_threshold(self) -> int:
         """
         Reads the contents of the DO3Threshold register.
@@ -889,14 +955,15 @@ class AnalogInput(Device):
         int
             Value read from the DO3Threshold register.
         """
-        address = 69
+        address = AnalogInputRegisters.DO3_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO3Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do3_threshold(self, value: int):
+    def write_do3_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3Threshold register.
 
@@ -905,10 +972,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO3Threshold register.
         """
-        address = 69
+        address = AnalogInputRegisters.DO3_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3Threshold")
+
+        return reply
+
     def read_do0_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO0TimeAboveThreshold register.
@@ -918,14 +988,15 @@ class AnalogInput(Device):
         int
             Value read from the DO0TimeAboveThreshold register.
         """
-        address = 74
+        address = AnalogInputRegisters.DO0_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO0TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do0_time_above_threshold(self, value: int):
+    def write_do0_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0TimeAboveThreshold register.
 
@@ -934,10 +1005,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO0TimeAboveThreshold register.
         """
-        address = 74
+        address = AnalogInputRegisters.DO0_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0TimeAboveThreshold")
+
+        return reply
+
     def read_do1_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO1TimeAboveThreshold register.
@@ -947,14 +1021,15 @@ class AnalogInput(Device):
         int
             Value read from the DO1TimeAboveThreshold register.
         """
-        address = 75
+        address = AnalogInputRegisters.DO1_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO1TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do1_time_above_threshold(self, value: int):
+    def write_do1_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1TimeAboveThreshold register.
 
@@ -963,10 +1038,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO1TimeAboveThreshold register.
         """
-        address = 75
+        address = AnalogInputRegisters.DO1_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1TimeAboveThreshold")
+
+        return reply
+
     def read_do2_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO2TimeAboveThreshold register.
@@ -976,14 +1054,15 @@ class AnalogInput(Device):
         int
             Value read from the DO2TimeAboveThreshold register.
         """
-        address = 76
+        address = AnalogInputRegisters.DO2_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO2TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do2_time_above_threshold(self, value: int):
+    def write_do2_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2TimeAboveThreshold register.
 
@@ -992,10 +1071,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO2TimeAboveThreshold register.
         """
-        address = 76
+        address = AnalogInputRegisters.DO2_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2TimeAboveThreshold")
+
+        return reply
+
     def read_do3_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO3TimeAboveThreshold register.
@@ -1005,14 +1087,15 @@ class AnalogInput(Device):
         int
             Value read from the DO3TimeAboveThreshold register.
         """
-        address = 77
+        address = AnalogInputRegisters.DO3_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO3TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do3_time_above_threshold(self, value: int):
+    def write_do3_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3TimeAboveThreshold register.
 
@@ -1021,10 +1104,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO3TimeAboveThreshold register.
         """
-        address = 77
+        address = AnalogInputRegisters.DO3_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3TimeAboveThreshold")
+
+        return reply
+
     def read_do0_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO0TimeBelowThreshold register.
@@ -1034,14 +1120,15 @@ class AnalogInput(Device):
         int
             Value read from the DO0TimeBelowThreshold register.
         """
-        address = 82
+        address = AnalogInputRegisters.DO0_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO0TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do0_time_below_threshold(self, value: int):
+    def write_do0_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0TimeBelowThreshold register.
 
@@ -1050,10 +1137,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO0TimeBelowThreshold register.
         """
-        address = 82
+        address = AnalogInputRegisters.DO0_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0TimeBelowThreshold")
+
+        return reply
+
     def read_do1_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO1TimeBelowThreshold register.
@@ -1063,14 +1153,15 @@ class AnalogInput(Device):
         int
             Value read from the DO1TimeBelowThreshold register.
         """
-        address = 83
+        address = AnalogInputRegisters.DO1_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO1TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do1_time_below_threshold(self, value: int):
+    def write_do1_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1TimeBelowThreshold register.
 
@@ -1079,10 +1170,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO1TimeBelowThreshold register.
         """
-        address = 83
+        address = AnalogInputRegisters.DO1_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1TimeBelowThreshold")
+
+        return reply
+
     def read_do2_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO2TimeBelowThreshold register.
@@ -1092,14 +1186,15 @@ class AnalogInput(Device):
         int
             Value read from the DO2TimeBelowThreshold register.
         """
-        address = 84
+        address = AnalogInputRegisters.DO2_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO2TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do2_time_below_threshold(self, value: int):
+    def write_do2_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2TimeBelowThreshold register.
 
@@ -1108,10 +1203,13 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO2TimeBelowThreshold register.
         """
-        address = 84
+        address = AnalogInputRegisters.DO2_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2TimeBelowThreshold")
+
+        return reply
+
     def read_do3_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO3TimeBelowThreshold register.
@@ -1121,14 +1219,15 @@ class AnalogInput(Device):
         int
             Value read from the DO3TimeBelowThreshold register.
         """
-        address = 85
+        address = AnalogInputRegisters.DO3_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO3TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do3_time_below_threshold(self, value: int):
+    def write_do3_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3TimeBelowThreshold register.
 
@@ -1137,7 +1236,10 @@ class AnalogInput(Device):
         value : int
             Value to write to the DO3TimeBelowThreshold register.
         """
-        address = 85
+        address = AnalogInputRegisters.DO3_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3TimeBelowThreshold")
+
+        return reply
+

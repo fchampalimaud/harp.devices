@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 @dataclass
 class AnalogDataPayload:
@@ -78,7 +77,7 @@ class SoundCardEvents(IntFlag):
     ADC_VALUES = 0x8
 
 
-class DigitalInputConfiguration(Enum):
+class DigitalInputConfiguration(IntEnum):
     """
     Specifies the operation mode of the digital input.
 
@@ -106,7 +105,7 @@ class DigitalInputConfiguration(Enum):
     START_FREQUENCY = 5
 
 
-class DigitalOutputConfiguration(Enum):
+class DigitalOutputConfiguration(IntEnum):
     """
     Specifies the operation mode of the digital output.
 
@@ -143,7 +142,7 @@ class DigitalOutputConfiguration(Enum):
     PULSE_100MS_WHEN_STOP = 8
 
 
-class ControllerCommand(Enum):
+class ControllerCommand(IntEnum):
     """
     Specifies commands to send to the PIC32 micro-controller
 
@@ -162,7 +161,7 @@ class ControllerCommand(Enum):
     DELETE_ALL_SOUNDS = 255
 
 
-class AdcConfiguration(Enum):
+class AdcConfiguration(IntEnum):
     """
     Specifies the operation mode of the analog inputs.
 
@@ -193,7 +192,7 @@ class AdcConfiguration(Enum):
     AMPLITUDE_BOTH_FREQUENCY = 6
 
 
-class SoundCardRegisters(Enum):
+class SoundCardRegisters(IntEnum):
     """Enum for all available registers in the SoundCard device.
 
     Attributes
@@ -283,6 +282,7 @@ class SoundCardRegisters(Enum):
     ENABLE_EVENTS : int
         Specifies the active events in the SoundCard device
     """
+
     PLAY_SOUND_OR_FREQUENCY = 32
     STOP = 33
     ATTENUATION_LEFT = 34
@@ -350,14 +350,15 @@ class SoundCard(Device):
         int
             Value read from the PlaySoundOrFrequency register.
         """
-        address = 32
+        address = SoundCardRegisters.PLAY_SOUND_OR_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PlaySoundOrFrequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PlaySoundOrFrequency")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_play_sound_or_frequency(self, value: int):
+    def write_play_sound_or_frequency(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PlaySoundOrFrequency register.
 
@@ -366,10 +367,13 @@ class SoundCard(Device):
         value : int
             Value to write to the PlaySoundOrFrequency register.
         """
-        address = 32
+        address = SoundCardRegisters.PLAY_SOUND_OR_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PlaySoundOrFrequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PlaySoundOrFrequency")
+
+        return reply
+
     def read_stop(self) -> int:
         """
         Reads the contents of the Stop register.
@@ -379,14 +383,15 @@ class SoundCard(Device):
         int
             Value read from the Stop register.
         """
-        address = 33
+        address = SoundCardRegisters.STOP
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Stop", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Stop")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_stop(self, value: int):
+    def write_stop(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Stop register.
 
@@ -395,10 +400,13 @@ class SoundCard(Device):
         value : int
             Value to write to the Stop register.
         """
-        address = 33
+        address = SoundCardRegisters.STOP
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Stop", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Stop")
+
+        return reply
+
     def read_attenuation_left(self) -> int:
         """
         Reads the contents of the AttenuationLeft register.
@@ -408,14 +416,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationLeft register.
         """
-        address = 34
+        address = SoundCardRegisters.ATTENUATION_LEFT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationLeft", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationLeft")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_left(self, value: int):
+    def write_attenuation_left(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationLeft register.
 
@@ -424,10 +433,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationLeft register.
         """
-        address = 34
+        address = SoundCardRegisters.ATTENUATION_LEFT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationLeft", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationLeft")
+
+        return reply
+
     def read_attenuation_right(self) -> int:
         """
         Reads the contents of the AttenuationRight register.
@@ -437,14 +449,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationRight register.
         """
-        address = 35
+        address = SoundCardRegisters.ATTENUATION_RIGHT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationRight", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationRight")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_right(self, value: int):
+    def write_attenuation_right(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationRight register.
 
@@ -453,10 +466,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationRight register.
         """
-        address = 35
+        address = SoundCardRegisters.ATTENUATION_RIGHT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationRight", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationRight")
+
+        return reply
+
     def read_attenuation_both(self) -> list[int]:
         """
         Reads the contents of the AttenuationBoth register.
@@ -466,14 +482,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationBoth register.
         """
-        address = 36
+        address = SoundCardRegisters.ATTENUATION_BOTH
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationBoth", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationBoth")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_both(self, value: list[int]):
+    def write_attenuation_both(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationBoth register.
 
@@ -482,10 +499,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationBoth register.
         """
-        address = 36
+        address = SoundCardRegisters.ATTENUATION_BOTH
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationBoth", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationBoth")
+
+        return reply
+
     def read_attenuation_and_play_sound_or_freq(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndPlaySoundOrFreq register.
@@ -495,14 +515,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndPlaySoundOrFreq register.
         """
-        address = 37
+        address = SoundCardRegisters.ATTENUATION_AND_PLAY_SOUND_OR_FREQ
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndPlaySoundOrFreq", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndPlaySoundOrFreq")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_play_sound_or_freq(self, value: list[int]):
+    def write_attenuation_and_play_sound_or_freq(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndPlaySoundOrFreq register.
 
@@ -511,10 +532,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndPlaySoundOrFreq register.
         """
-        address = 37
+        address = SoundCardRegisters.ATTENUATION_AND_PLAY_SOUND_OR_FREQ
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndPlaySoundOrFreq", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndPlaySoundOrFreq")
+
+        return reply
+
     def read_input_state(self) -> DigitalInputs:
         """
         Reads the contents of the InputState register.
@@ -524,12 +548,12 @@ class SoundCard(Device):
         DigitalInputs
             Value read from the InputState register.
         """
-        address = 40
+        address = SoundCardRegisters.INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("InputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("InputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_configure_di0(self) -> DigitalInputConfiguration:
         """
@@ -540,14 +564,14 @@ class SoundCard(Device):
         DigitalInputConfiguration
             Value read from the ConfigureDI0 register.
         """
-        address = 41
+        address = SoundCardRegisters.CONFIGURE_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureDI0")
 
-        return reply.payload
+        return DigitalInputConfiguration(reply.payload)
 
-    def write_configure_di0(self, value: DigitalInputConfiguration):
+    def write_configure_di0(self, value: DigitalInputConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureDI0 register.
 
@@ -556,10 +580,13 @@ class SoundCard(Device):
         value : DigitalInputConfiguration
             Value to write to the ConfigureDI0 register.
         """
-        address = 41
+        address = SoundCardRegisters.CONFIGURE_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureDI0")
+
+        return reply
+
     def read_configure_di1(self) -> DigitalInputConfiguration:
         """
         Reads the contents of the ConfigureDI1 register.
@@ -569,14 +596,14 @@ class SoundCard(Device):
         DigitalInputConfiguration
             Value read from the ConfigureDI1 register.
         """
-        address = 42
+        address = SoundCardRegisters.CONFIGURE_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureDI1")
 
-        return reply.payload
+        return DigitalInputConfiguration(reply.payload)
 
-    def write_configure_di1(self, value: DigitalInputConfiguration):
+    def write_configure_di1(self, value: DigitalInputConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureDI1 register.
 
@@ -585,10 +612,13 @@ class SoundCard(Device):
         value : DigitalInputConfiguration
             Value to write to the ConfigureDI1 register.
         """
-        address = 42
+        address = SoundCardRegisters.CONFIGURE_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureDI1")
+
+        return reply
+
     def read_configure_di2(self) -> DigitalInputConfiguration:
         """
         Reads the contents of the ConfigureDI2 register.
@@ -598,14 +628,14 @@ class SoundCard(Device):
         DigitalInputConfiguration
             Value read from the ConfigureDI2 register.
         """
-        address = 43
+        address = SoundCardRegisters.CONFIGURE_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureDI2")
 
-        return reply.payload
+        return DigitalInputConfiguration(reply.payload)
 
-    def write_configure_di2(self, value: DigitalInputConfiguration):
+    def write_configure_di2(self, value: DigitalInputConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureDI2 register.
 
@@ -614,10 +644,13 @@ class SoundCard(Device):
         value : DigitalInputConfiguration
             Value to write to the ConfigureDI2 register.
         """
-        address = 43
+        address = SoundCardRegisters.CONFIGURE_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureDI2")
+
+        return reply
+
     def read_sound_index_di0(self) -> int:
         """
         Reads the contents of the SoundIndexDI0 register.
@@ -627,14 +660,15 @@ class SoundCard(Device):
         int
             Value read from the SoundIndexDI0 register.
         """
-        address = 44
+        address = SoundCardRegisters.SOUND_INDEX_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("SoundIndexDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("SoundIndexDI0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_sound_index_di0(self, value: int):
+    def write_sound_index_di0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the SoundIndexDI0 register.
 
@@ -643,10 +677,13 @@ class SoundCard(Device):
         value : int
             Value to write to the SoundIndexDI0 register.
         """
-        address = 44
+        address = SoundCardRegisters.SOUND_INDEX_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("SoundIndexDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("SoundIndexDI0")
+
+        return reply
+
     def read_sound_index_di1(self) -> int:
         """
         Reads the contents of the SoundIndexDI1 register.
@@ -656,14 +693,15 @@ class SoundCard(Device):
         int
             Value read from the SoundIndexDI1 register.
         """
-        address = 45
+        address = SoundCardRegisters.SOUND_INDEX_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("SoundIndexDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("SoundIndexDI1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_sound_index_di1(self, value: int):
+    def write_sound_index_di1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the SoundIndexDI1 register.
 
@@ -672,10 +710,13 @@ class SoundCard(Device):
         value : int
             Value to write to the SoundIndexDI1 register.
         """
-        address = 45
+        address = SoundCardRegisters.SOUND_INDEX_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("SoundIndexDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("SoundIndexDI1")
+
+        return reply
+
     def read_sound_index_di2(self) -> int:
         """
         Reads the contents of the SoundIndexDI2 register.
@@ -685,14 +726,15 @@ class SoundCard(Device):
         int
             Value read from the SoundIndexDI2 register.
         """
-        address = 46
+        address = SoundCardRegisters.SOUND_INDEX_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("SoundIndexDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("SoundIndexDI2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_sound_index_di2(self, value: int):
+    def write_sound_index_di2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the SoundIndexDI2 register.
 
@@ -701,10 +743,13 @@ class SoundCard(Device):
         value : int
             Value to write to the SoundIndexDI2 register.
         """
-        address = 46
+        address = SoundCardRegisters.SOUND_INDEX_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("SoundIndexDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("SoundIndexDI2")
+
+        return reply
+
     def read_frequency_di0(self) -> int:
         """
         Reads the contents of the FrequencyDI0 register.
@@ -714,14 +759,15 @@ class SoundCard(Device):
         int
             Value read from the FrequencyDI0 register.
         """
-        address = 47
+        address = SoundCardRegisters.FREQUENCY_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("FrequencyDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("FrequencyDI0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_frequency_di0(self, value: int):
+    def write_frequency_di0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the FrequencyDI0 register.
 
@@ -730,10 +776,13 @@ class SoundCard(Device):
         value : int
             Value to write to the FrequencyDI0 register.
         """
-        address = 47
+        address = SoundCardRegisters.FREQUENCY_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("FrequencyDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("FrequencyDI0")
+
+        return reply
+
     def read_frequency_di1(self) -> int:
         """
         Reads the contents of the FrequencyDI1 register.
@@ -743,14 +792,15 @@ class SoundCard(Device):
         int
             Value read from the FrequencyDI1 register.
         """
-        address = 48
+        address = SoundCardRegisters.FREQUENCY_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("FrequencyDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("FrequencyDI1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_frequency_di1(self, value: int):
+    def write_frequency_di1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the FrequencyDI1 register.
 
@@ -759,10 +809,13 @@ class SoundCard(Device):
         value : int
             Value to write to the FrequencyDI1 register.
         """
-        address = 48
+        address = SoundCardRegisters.FREQUENCY_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("FrequencyDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("FrequencyDI1")
+
+        return reply
+
     def read_frequency_di2(self) -> int:
         """
         Reads the contents of the FrequencyDI2 register.
@@ -772,14 +825,15 @@ class SoundCard(Device):
         int
             Value read from the FrequencyDI2 register.
         """
-        address = 49
+        address = SoundCardRegisters.FREQUENCY_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("FrequencyDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("FrequencyDI2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_frequency_di2(self, value: int):
+    def write_frequency_di2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the FrequencyDI2 register.
 
@@ -788,10 +842,13 @@ class SoundCard(Device):
         value : int
             Value to write to the FrequencyDI2 register.
         """
-        address = 49
+        address = SoundCardRegisters.FREQUENCY_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("FrequencyDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("FrequencyDI2")
+
+        return reply
+
     def read_attenuation_left_di0(self) -> int:
         """
         Reads the contents of the AttenuationLeftDI0 register.
@@ -801,14 +858,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationLeftDI0 register.
         """
-        address = 50
+        address = SoundCardRegisters.ATTENUATION_LEFT_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationLeftDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationLeftDI0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_left_di0(self, value: int):
+    def write_attenuation_left_di0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationLeftDI0 register.
 
@@ -817,10 +875,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationLeftDI0 register.
         """
-        address = 50
+        address = SoundCardRegisters.ATTENUATION_LEFT_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationLeftDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationLeftDI0")
+
+        return reply
+
     def read_attenuation_left_di1(self) -> int:
         """
         Reads the contents of the AttenuationLeftDI1 register.
@@ -830,14 +891,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationLeftDI1 register.
         """
-        address = 51
+        address = SoundCardRegisters.ATTENUATION_LEFT_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationLeftDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationLeftDI1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_left_di1(self, value: int):
+    def write_attenuation_left_di1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationLeftDI1 register.
 
@@ -846,10 +908,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationLeftDI1 register.
         """
-        address = 51
+        address = SoundCardRegisters.ATTENUATION_LEFT_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationLeftDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationLeftDI1")
+
+        return reply
+
     def read_attenuation_left_di2(self) -> int:
         """
         Reads the contents of the AttenuationLeftDI2 register.
@@ -859,14 +924,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationLeftDI2 register.
         """
-        address = 52
+        address = SoundCardRegisters.ATTENUATION_LEFT_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationLeftDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationLeftDI2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_left_di2(self, value: int):
+    def write_attenuation_left_di2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationLeftDI2 register.
 
@@ -875,10 +941,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationLeftDI2 register.
         """
-        address = 52
+        address = SoundCardRegisters.ATTENUATION_LEFT_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationLeftDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationLeftDI2")
+
+        return reply
+
     def read_attenuation_right_di0(self) -> int:
         """
         Reads the contents of the AttenuationRightDI0 register.
@@ -888,14 +957,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationRightDI0 register.
         """
-        address = 53
+        address = SoundCardRegisters.ATTENUATION_RIGHT_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationRightDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationRightDI0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_right_di0(self, value: int):
+    def write_attenuation_right_di0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationRightDI0 register.
 
@@ -904,10 +974,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationRightDI0 register.
         """
-        address = 53
+        address = SoundCardRegisters.ATTENUATION_RIGHT_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationRightDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationRightDI0")
+
+        return reply
+
     def read_attenuation_right_di1(self) -> int:
         """
         Reads the contents of the AttenuationRightDI1 register.
@@ -917,14 +990,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationRightDI1 register.
         """
-        address = 54
+        address = SoundCardRegisters.ATTENUATION_RIGHT_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationRightDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationRightDI1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_right_di1(self, value: int):
+    def write_attenuation_right_di1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationRightDI1 register.
 
@@ -933,10 +1007,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationRightDI1 register.
         """
-        address = 54
+        address = SoundCardRegisters.ATTENUATION_RIGHT_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationRightDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationRightDI1")
+
+        return reply
+
     def read_attenuation_right_di2(self) -> int:
         """
         Reads the contents of the AttenuationRightDI2 register.
@@ -946,14 +1023,15 @@ class SoundCard(Device):
         int
             Value read from the AttenuationRightDI2 register.
         """
-        address = 55
+        address = SoundCardRegisters.ATTENUATION_RIGHT_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationRightDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationRightDI2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_right_di2(self, value: int):
+    def write_attenuation_right_di2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationRightDI2 register.
 
@@ -962,10 +1040,13 @@ class SoundCard(Device):
         value : int
             Value to write to the AttenuationRightDI2 register.
         """
-        address = 55
+        address = SoundCardRegisters.ATTENUATION_RIGHT_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationRightDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationRightDI2")
+
+        return reply
+
     def read_attenuation_and_sound_index_di0(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndSoundIndexDI0 register.
@@ -975,14 +1056,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndSoundIndexDI0 register.
         """
-        address = 56
+        address = SoundCardRegisters.ATTENUATION_AND_SOUND_INDEX_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndSoundIndexDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndSoundIndexDI0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_sound_index_di0(self, value: list[int]):
+    def write_attenuation_and_sound_index_di0(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndSoundIndexDI0 register.
 
@@ -991,10 +1073,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndSoundIndexDI0 register.
         """
-        address = 56
+        address = SoundCardRegisters.ATTENUATION_AND_SOUND_INDEX_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndSoundIndexDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndSoundIndexDI0")
+
+        return reply
+
     def read_attenuation_and_sound_index_di1(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndSoundIndexDI1 register.
@@ -1004,14 +1089,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndSoundIndexDI1 register.
         """
-        address = 57
+        address = SoundCardRegisters.ATTENUATION_AND_SOUND_INDEX_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndSoundIndexDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndSoundIndexDI1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_sound_index_di1(self, value: list[int]):
+    def write_attenuation_and_sound_index_di1(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndSoundIndexDI1 register.
 
@@ -1020,10 +1106,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndSoundIndexDI1 register.
         """
-        address = 57
+        address = SoundCardRegisters.ATTENUATION_AND_SOUND_INDEX_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndSoundIndexDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndSoundIndexDI1")
+
+        return reply
+
     def read_attenuation_and_sound_index_di2(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndSoundIndexDI2 register.
@@ -1033,14 +1122,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndSoundIndexDI2 register.
         """
-        address = 58
+        address = SoundCardRegisters.ATTENUATION_AND_SOUND_INDEX_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndSoundIndexDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndSoundIndexDI2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_sound_index_di2(self, value: list[int]):
+    def write_attenuation_and_sound_index_di2(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndSoundIndexDI2 register.
 
@@ -1049,10 +1139,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndSoundIndexDI2 register.
         """
-        address = 58
+        address = SoundCardRegisters.ATTENUATION_AND_SOUND_INDEX_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndSoundIndexDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndSoundIndexDI2")
+
+        return reply
+
     def read_attenuation_and_frequency_di0(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndFrequencyDI0 register.
@@ -1062,14 +1155,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndFrequencyDI0 register.
         """
-        address = 59
+        address = SoundCardRegisters.ATTENUATION_AND_FREQUENCY_DI0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndFrequencyDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndFrequencyDI0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_frequency_di0(self, value: list[int]):
+    def write_attenuation_and_frequency_di0(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndFrequencyDI0 register.
 
@@ -1078,10 +1172,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndFrequencyDI0 register.
         """
-        address = 59
+        address = SoundCardRegisters.ATTENUATION_AND_FREQUENCY_DI0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndFrequencyDI0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndFrequencyDI0")
+
+        return reply
+
     def read_attenuation_and_frequency_di1(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndFrequencyDI1 register.
@@ -1091,14 +1188,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndFrequencyDI1 register.
         """
-        address = 60
+        address = SoundCardRegisters.ATTENUATION_AND_FREQUENCY_DI1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndFrequencyDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndFrequencyDI1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_frequency_di1(self, value: list[int]):
+    def write_attenuation_and_frequency_di1(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndFrequencyDI1 register.
 
@@ -1107,10 +1205,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndFrequencyDI1 register.
         """
-        address = 60
+        address = SoundCardRegisters.ATTENUATION_AND_FREQUENCY_DI1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndFrequencyDI1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndFrequencyDI1")
+
+        return reply
+
     def read_attenuation_and_frequency_di2(self) -> list[int]:
         """
         Reads the contents of the AttenuationAndFrequencyDI2 register.
@@ -1120,14 +1221,15 @@ class SoundCard(Device):
         list[int]
             Value read from the AttenuationAndFrequencyDI2 register.
         """
-        address = 61
+        address = SoundCardRegisters.ATTENUATION_AND_FREQUENCY_DI2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AttenuationAndFrequencyDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AttenuationAndFrequencyDI2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_attenuation_and_frequency_di2(self, value: list[int]):
+    def write_attenuation_and_frequency_di2(self, value: list[int]) -> ReplyHarpMessage | None:
         """
         Writes a value to the AttenuationAndFrequencyDI2 register.
 
@@ -1136,10 +1238,13 @@ class SoundCard(Device):
         value : list[int]
             Value to write to the AttenuationAndFrequencyDI2 register.
         """
-        address = 61
+        address = SoundCardRegisters.ATTENUATION_AND_FREQUENCY_DI2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("AttenuationAndFrequencyDI2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AttenuationAndFrequencyDI2")
+
+        return reply
+
     def read_configure_do0(self) -> DigitalOutputConfiguration:
         """
         Reads the contents of the ConfigureDO0 register.
@@ -1149,14 +1254,14 @@ class SoundCard(Device):
         DigitalOutputConfiguration
             Value read from the ConfigureDO0 register.
         """
-        address = 65
+        address = SoundCardRegisters.CONFIGURE_DO0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureDO0")
 
-        return reply.payload
+        return DigitalOutputConfiguration(reply.payload)
 
-    def write_configure_do0(self, value: DigitalOutputConfiguration):
+    def write_configure_do0(self, value: DigitalOutputConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureDO0 register.
 
@@ -1165,10 +1270,13 @@ class SoundCard(Device):
         value : DigitalOutputConfiguration
             Value to write to the ConfigureDO0 register.
         """
-        address = 65
+        address = SoundCardRegisters.CONFIGURE_DO0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureDO0")
+
+        return reply
+
     def read_configure_do1(self) -> DigitalOutputConfiguration:
         """
         Reads the contents of the ConfigureDO1 register.
@@ -1178,14 +1286,14 @@ class SoundCard(Device):
         DigitalOutputConfiguration
             Value read from the ConfigureDO1 register.
         """
-        address = 66
+        address = SoundCardRegisters.CONFIGURE_DO1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureDO1")
 
-        return reply.payload
+        return DigitalOutputConfiguration(reply.payload)
 
-    def write_configure_do1(self, value: DigitalOutputConfiguration):
+    def write_configure_do1(self, value: DigitalOutputConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureDO1 register.
 
@@ -1194,10 +1302,13 @@ class SoundCard(Device):
         value : DigitalOutputConfiguration
             Value to write to the ConfigureDO1 register.
         """
-        address = 66
+        address = SoundCardRegisters.CONFIGURE_DO1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureDO1")
+
+        return reply
+
     def read_configure_do2(self) -> DigitalOutputConfiguration:
         """
         Reads the contents of the ConfigureDO2 register.
@@ -1207,14 +1318,14 @@ class SoundCard(Device):
         DigitalOutputConfiguration
             Value read from the ConfigureDO2 register.
         """
-        address = 67
+        address = SoundCardRegisters.CONFIGURE_DO2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureDO2")
 
-        return reply.payload
+        return DigitalOutputConfiguration(reply.payload)
 
-    def write_configure_do2(self, value: DigitalOutputConfiguration):
+    def write_configure_do2(self, value: DigitalOutputConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureDO2 register.
 
@@ -1223,10 +1334,13 @@ class SoundCard(Device):
         value : DigitalOutputConfiguration
             Value to write to the ConfigureDO2 register.
         """
-        address = 67
+        address = SoundCardRegisters.CONFIGURE_DO2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureDO2")
+
+        return reply
+
     def read_pulse_do0(self) -> int:
         """
         Reads the contents of the PulseDO0 register.
@@ -1236,14 +1350,15 @@ class SoundCard(Device):
         int
             Value read from the PulseDO0 register.
         """
-        address = 68
+        address = SoundCardRegisters.PULSE_DO0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do0(self, value: int):
+    def write_pulse_do0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO0 register.
 
@@ -1252,10 +1367,13 @@ class SoundCard(Device):
         value : int
             Value to write to the PulseDO0 register.
         """
-        address = 68
+        address = SoundCardRegisters.PULSE_DO0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO0")
+
+        return reply
+
     def read_pulse_do1(self) -> int:
         """
         Reads the contents of the PulseDO1 register.
@@ -1265,14 +1383,15 @@ class SoundCard(Device):
         int
             Value read from the PulseDO1 register.
         """
-        address = 69
+        address = SoundCardRegisters.PULSE_DO1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do1(self, value: int):
+    def write_pulse_do1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO1 register.
 
@@ -1281,10 +1400,13 @@ class SoundCard(Device):
         value : int
             Value to write to the PulseDO1 register.
         """
-        address = 69
+        address = SoundCardRegisters.PULSE_DO1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO1")
+
+        return reply
+
     def read_pulse_do2(self) -> int:
         """
         Reads the contents of the PulseDO2 register.
@@ -1294,14 +1416,15 @@ class SoundCard(Device):
         int
             Value read from the PulseDO2 register.
         """
-        address = 70
+        address = SoundCardRegisters.PULSE_DO2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do2(self, value: int):
+    def write_pulse_do2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO2 register.
 
@@ -1310,10 +1433,13 @@ class SoundCard(Device):
         value : int
             Value to write to the PulseDO2 register.
         """
-        address = 70
+        address = SoundCardRegisters.PULSE_DO2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO2")
+
+        return reply
+
     def read_output_set(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputSet register.
@@ -1323,14 +1449,14 @@ class SoundCard(Device):
         DigitalOutputs
             Value read from the OutputSet register.
         """
-        address = 74
+        address = SoundCardRegisters.OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("OutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputSet")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_set(self, value: DigitalOutputs):
+    def write_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputSet register.
 
@@ -1339,10 +1465,13 @@ class SoundCard(Device):
         value : DigitalOutputs
             Value to write to the OutputSet register.
         """
-        address = 74
+        address = SoundCardRegisters.OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputSet")
+
+        return reply
+
     def read_output_clear(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputClear register.
@@ -1352,14 +1481,14 @@ class SoundCard(Device):
         DigitalOutputs
             Value read from the OutputClear register.
         """
-        address = 75
+        address = SoundCardRegisters.OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("OutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputClear")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_clear(self, value: DigitalOutputs):
+    def write_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputClear register.
 
@@ -1368,10 +1497,13 @@ class SoundCard(Device):
         value : DigitalOutputs
             Value to write to the OutputClear register.
         """
-        address = 75
+        address = SoundCardRegisters.OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputClear")
+
+        return reply
+
     def read_output_toggle(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputToggle register.
@@ -1381,14 +1513,14 @@ class SoundCard(Device):
         DigitalOutputs
             Value read from the OutputToggle register.
         """
-        address = 76
+        address = SoundCardRegisters.OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("OutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputToggle")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_toggle(self, value: DigitalOutputs):
+    def write_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputToggle register.
 
@@ -1397,10 +1529,13 @@ class SoundCard(Device):
         value : DigitalOutputs
             Value to write to the OutputToggle register.
         """
-        address = 76
+        address = SoundCardRegisters.OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputToggle")
+
+        return reply
+
     def read_output_state(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputState register.
@@ -1410,14 +1545,14 @@ class SoundCard(Device):
         DigitalOutputs
             Value read from the OutputState register.
         """
-        address = 77
+        address = SoundCardRegisters.OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("OutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputState")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_state(self, value: DigitalOutputs):
+    def write_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputState register.
 
@@ -1426,10 +1561,13 @@ class SoundCard(Device):
         value : DigitalOutputs
             Value to write to the OutputState register.
         """
-        address = 77
+        address = SoundCardRegisters.OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputState")
+
+        return reply
+
     def read_configure_adc(self) -> AdcConfiguration:
         """
         Reads the contents of the ConfigureAdc register.
@@ -1439,14 +1577,14 @@ class SoundCard(Device):
         AdcConfiguration
             Value read from the ConfigureAdc register.
         """
-        address = 80
+        address = SoundCardRegisters.CONFIGURE_ADC
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ConfigureAdc", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ConfigureAdc")
 
-        return reply.payload
+        return AdcConfiguration(reply.payload)
 
-    def write_configure_adc(self, value: AdcConfiguration):
+    def write_configure_adc(self, value: AdcConfiguration) -> ReplyHarpMessage | None:
         """
         Writes a value to the ConfigureAdc register.
 
@@ -1455,10 +1593,13 @@ class SoundCard(Device):
         value : AdcConfiguration
             Value to write to the ConfigureAdc register.
         """
-        address = 80
+        address = SoundCardRegisters.CONFIGURE_ADC
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ConfigureAdc", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ConfigureAdc")
+
+        return reply
+
     def read_analog_data(self) -> AnalogDataPayload:
         """
         Reads the contents of the AnalogData register.
@@ -1468,12 +1609,20 @@ class SoundCard(Device):
         AnalogDataPayload
             Value read from the AnalogData register.
         """
-        address = 81
+        address = SoundCardRegisters.ANALOG_DATA
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("AnalogData", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AnalogData")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return AnalogDataPayload(
+            Adc0=payload[0],
+            Adc1=payload[1],
+            AttenuationLeft=payload[2],
+            AttenuationRight=payload[3],
+            Frequency=payload[4]
+        )
 
     def read_commands(self) -> ControllerCommand:
         """
@@ -1484,14 +1633,14 @@ class SoundCard(Device):
         ControllerCommand
             Value read from the Commands register.
         """
-        address = 82
+        address = SoundCardRegisters.COMMANDS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Commands", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Commands")
 
-        return reply.payload
+        return ControllerCommand(reply.payload)
 
-    def write_commands(self, value: ControllerCommand):
+    def write_commands(self, value: ControllerCommand) -> ReplyHarpMessage | None:
         """
         Writes a value to the Commands register.
 
@@ -1500,10 +1649,13 @@ class SoundCard(Device):
         value : ControllerCommand
             Value to write to the Commands register.
         """
-        address = 82
+        address = SoundCardRegisters.COMMANDS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Commands", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Commands")
+
+        return reply
+
     def read_enable_events(self) -> SoundCardEvents:
         """
         Reads the contents of the EnableEvents register.
@@ -1513,14 +1665,14 @@ class SoundCard(Device):
         SoundCardEvents
             Value read from the EnableEvents register.
         """
-        address = 86
+        address = SoundCardRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableEvents")
 
-        return reply.payload
+        return SoundCardEvents(reply.payload)
 
-    def write_enable_events(self, value: SoundCardEvents):
+    def write_enable_events(self, value: SoundCardEvents) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -1529,7 +1681,10 @@ class SoundCard(Device):
         value : SoundCardEvents
             Value to write to the EnableEvents register.
         """
-        address = 86
+        address = SoundCardRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableEvents")
+
+        return reply
+

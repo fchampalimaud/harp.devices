@@ -1,1 +1,1 @@
-::: harp.devices.audioswitch.harpdevice
+::: harp.devices.audioswitch

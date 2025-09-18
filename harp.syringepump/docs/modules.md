@@ -1,1 +1,1 @@
-::: harp.devices.syringepump.harpdevice
+::: harp.devices.syringepump

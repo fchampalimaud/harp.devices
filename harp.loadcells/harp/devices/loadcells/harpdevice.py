@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 @dataclass
 class LoadCellDataPayload:
@@ -105,7 +104,7 @@ class LoadCellEvents(IntFlag):
     THRESHOLDS = 0x8
 
 
-class TriggerConfig(Enum):
+class TriggerConfig(IntEnum):
     """
     Available configurations when using a digital input as an acquisition trigger.
 
@@ -124,7 +123,7 @@ class TriggerConfig(Enum):
     FALLING_EDGE = 2
 
 
-class SyncConfig(Enum):
+class SyncConfig(IntEnum):
     """
     Available configurations when using a digital output pin to report firmware events.
 
@@ -143,7 +142,7 @@ class SyncConfig(Enum):
     PULSE = 2
 
 
-class LoadCellChannel(Enum):
+class LoadCellChannel(IntEnum):
     """
     Available target load cells to be targeted on threshold events.
 
@@ -180,7 +179,7 @@ class LoadCellChannel(Enum):
     NONE = 8
 
 
-class LoadCellsRegisters(Enum):
+class LoadCellsRegisters(IntEnum):
     """Enum for all available registers in the LoadCells device.
 
     Attributes
@@ -290,6 +289,7 @@ class LoadCellsRegisters(Enum):
     ENABLE_EVENTS : int
         Specifies the active events in the device.
     """
+
     ACQUISITION_STATE = 32
     LOAD_CELL_DATA = 33
     DIGITAL_INPUT_STATE = 34
@@ -367,14 +367,15 @@ class LoadCells(Device):
         bool
             Value read from the AcquisitionState register.
         """
-        address = 32
+        address = LoadCellsRegisters.ACQUISITION_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("AcquisitionState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AcquisitionState")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_acquisition_state(self, value: bool):
+    def write_acquisition_state(self, value: bool) -> ReplyHarpMessage | None:
         """
         Writes a value to the AcquisitionState register.
 
@@ -383,10 +384,13 @@ class LoadCells(Device):
         value : bool
             Value to write to the AcquisitionState register.
         """
-        address = 32
+        address = LoadCellsRegisters.ACQUISITION_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("AcquisitionState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AcquisitionState")
+
+        return reply
+
     def read_load_cell_data(self) -> LoadCellDataPayload:
         """
         Reads the contents of the LoadCellData register.
@@ -396,12 +400,23 @@ class LoadCells(Device):
         LoadCellDataPayload
             Value read from the LoadCellData register.
         """
-        address = 33
+        address = LoadCellsRegisters.LOAD_CELL_DATA
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("LoadCellData", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("LoadCellData")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return LoadCellDataPayload(
+            Channel0=payload[0],
+            Channel1=payload[1],
+            Channel2=payload[2],
+            Channel3=payload[3],
+            Channel4=payload[4],
+            Channel5=payload[5],
+            Channel6=payload[6],
+            Channel7=payload[7]
+        )
 
     def read_digital_input_state(self) -> DigitalInputs:
         """
@@ -412,12 +427,12 @@ class LoadCells(Device):
         DigitalInputs
             Value read from the DigitalInputState register.
         """
-        address = 34
+        address = LoadCellsRegisters.DIGITAL_INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_sync_output_state(self) -> SyncOutputs:
         """
@@ -428,12 +443,12 @@ class LoadCells(Device):
         SyncOutputs
             Value read from the SyncOutputState register.
         """
-        address = 35
+        address = LoadCellsRegisters.SYNC_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("SyncOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("SyncOutputState")
 
-        return reply.payload
+        return SyncOutputs(reply.payload)
 
     def read_di0_trigger(self) -> TriggerConfig:
         """
@@ -444,14 +459,14 @@ class LoadCells(Device):
         TriggerConfig
             Value read from the DI0Trigger register.
         """
-        address = 39
+        address = LoadCellsRegisters.DI0_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DI0Trigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DI0Trigger")
 
-        return reply.payload
+        return TriggerConfig(reply.payload)
 
-    def write_di0_trigger(self, value: TriggerConfig):
+    def write_di0_trigger(self, value: TriggerConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the DI0Trigger register.
 
@@ -460,10 +475,13 @@ class LoadCells(Device):
         value : TriggerConfig
             Value to write to the DI0Trigger register.
         """
-        address = 39
+        address = LoadCellsRegisters.DI0_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DI0Trigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DI0Trigger")
+
+        return reply
+
     def read_do0_sync(self) -> SyncConfig:
         """
         Reads the contents of the DO0Sync register.
@@ -473,14 +491,14 @@ class LoadCells(Device):
         SyncConfig
             Value read from the DO0Sync register.
         """
-        address = 40
+        address = LoadCellsRegisters.DO0_SYNC
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0Sync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0Sync")
 
-        return reply.payload
+        return SyncConfig(reply.payload)
 
-    def write_do0_sync(self, value: SyncConfig):
+    def write_do0_sync(self, value: SyncConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0Sync register.
 
@@ -489,10 +507,13 @@ class LoadCells(Device):
         value : SyncConfig
             Value to write to the DO0Sync register.
         """
-        address = 40
+        address = LoadCellsRegisters.DO0_SYNC
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0Sync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0Sync")
+
+        return reply
+
     def read_do0_pulse_width(self) -> int:
         """
         Reads the contents of the DO0PulseWidth register.
@@ -502,14 +523,15 @@ class LoadCells(Device):
         int
             Value read from the DO0PulseWidth register.
         """
-        address = 41
+        address = LoadCellsRegisters.DO0_PULSE_WIDTH
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0PulseWidth", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0PulseWidth")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do0_pulse_width(self, value: int):
+    def write_do0_pulse_width(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0PulseWidth register.
 
@@ -518,10 +540,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO0PulseWidth register.
         """
-        address = 41
+        address = LoadCellsRegisters.DO0_PULSE_WIDTH
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0PulseWidth", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0PulseWidth")
+
+        return reply
+
     def read_digital_output_set(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputSet register.
@@ -531,14 +556,14 @@ class LoadCells(Device):
         DigitalOutputs
             Value read from the DigitalOutputSet register.
         """
-        address = 42
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputSet")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_set(self, value: DigitalOutputs):
+    def write_digital_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputSet register.
 
@@ -547,10 +572,13 @@ class LoadCells(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputSet register.
         """
-        address = 42
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputSet")
+
+        return reply
+
     def read_digital_output_clear(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputClear register.
@@ -560,14 +588,14 @@ class LoadCells(Device):
         DigitalOutputs
             Value read from the DigitalOutputClear register.
         """
-        address = 43
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputClear")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_clear(self, value: DigitalOutputs):
+    def write_digital_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputClear register.
 
@@ -576,10 +604,13 @@ class LoadCells(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputClear register.
         """
-        address = 43
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputClear")
+
+        return reply
+
     def read_digital_output_toggle(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputToggle register.
@@ -589,14 +620,14 @@ class LoadCells(Device):
         DigitalOutputs
             Value read from the DigitalOutputToggle register.
         """
-        address = 44
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputToggle")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_toggle(self, value: DigitalOutputs):
+    def write_digital_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputToggle register.
 
@@ -605,10 +636,13 @@ class LoadCells(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputToggle register.
         """
-        address = 44
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputToggle")
+
+        return reply
+
     def read_digital_output_state(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputState register.
@@ -618,14 +652,14 @@ class LoadCells(Device):
         DigitalOutputs
             Value read from the DigitalOutputState register.
         """
-        address = 45
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputState")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_state(self, value: DigitalOutputs):
+    def write_digital_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputState register.
 
@@ -634,10 +668,13 @@ class LoadCells(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputState register.
         """
-        address = 45
+        address = LoadCellsRegisters.DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputState")
+
+        return reply
+
     def read_offset_load_cell0(self) -> int:
         """
         Reads the contents of the OffsetLoadCell0 register.
@@ -647,14 +684,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell0 register.
         """
-        address = 48
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell0(self, value: int):
+    def write_offset_load_cell0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell0 register.
 
@@ -663,10 +701,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell0 register.
         """
-        address = 48
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell0")
+
+        return reply
+
     def read_offset_load_cell1(self) -> int:
         """
         Reads the contents of the OffsetLoadCell1 register.
@@ -676,14 +717,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell1 register.
         """
-        address = 49
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell1(self, value: int):
+    def write_offset_load_cell1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell1 register.
 
@@ -692,10 +734,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell1 register.
         """
-        address = 49
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell1")
+
+        return reply
+
     def read_offset_load_cell2(self) -> int:
         """
         Reads the contents of the OffsetLoadCell2 register.
@@ -705,14 +750,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell2 register.
         """
-        address = 50
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell2(self, value: int):
+    def write_offset_load_cell2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell2 register.
 
@@ -721,10 +767,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell2 register.
         """
-        address = 50
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell2")
+
+        return reply
+
     def read_offset_load_cell3(self) -> int:
         """
         Reads the contents of the OffsetLoadCell3 register.
@@ -734,14 +783,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell3 register.
         """
-        address = 51
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL3
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell3")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell3(self, value: int):
+    def write_offset_load_cell3(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell3 register.
 
@@ -750,10 +800,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell3 register.
         """
-        address = 51
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL3
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell3")
+
+        return reply
+
     def read_offset_load_cell4(self) -> int:
         """
         Reads the contents of the OffsetLoadCell4 register.
@@ -763,14 +816,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell4 register.
         """
-        address = 52
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL4
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell4", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell4")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell4(self, value: int):
+    def write_offset_load_cell4(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell4 register.
 
@@ -779,10 +833,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell4 register.
         """
-        address = 52
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL4
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell4", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell4")
+
+        return reply
+
     def read_offset_load_cell5(self) -> int:
         """
         Reads the contents of the OffsetLoadCell5 register.
@@ -792,14 +849,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell5 register.
         """
-        address = 53
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL5
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell5", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell5")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell5(self, value: int):
+    def write_offset_load_cell5(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell5 register.
 
@@ -808,10 +866,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell5 register.
         """
-        address = 53
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL5
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell5", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell5")
+
+        return reply
+
     def read_offset_load_cell6(self) -> int:
         """
         Reads the contents of the OffsetLoadCell6 register.
@@ -821,14 +882,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell6 register.
         """
-        address = 54
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL6
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell6", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell6")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell6(self, value: int):
+    def write_offset_load_cell6(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell6 register.
 
@@ -837,10 +899,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell6 register.
         """
-        address = 54
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL6
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell6", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell6")
+
+        return reply
+
     def read_offset_load_cell7(self) -> int:
         """
         Reads the contents of the OffsetLoadCell7 register.
@@ -850,14 +915,15 @@ class LoadCells(Device):
         int
             Value read from the OffsetLoadCell7 register.
         """
-        address = 55
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL7
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("OffsetLoadCell7", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OffsetLoadCell7")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_offset_load_cell7(self, value: int):
+    def write_offset_load_cell7(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the OffsetLoadCell7 register.
 
@@ -866,10 +932,13 @@ class LoadCells(Device):
         value : int
             Value to write to the OffsetLoadCell7 register.
         """
-        address = 55
+        address = LoadCellsRegisters.OFFSET_LOAD_CELL7
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("OffsetLoadCell7", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OffsetLoadCell7")
+
+        return reply
+
     def read_do1_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO1TargetLoadCell register.
@@ -879,14 +948,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO1TargetLoadCell register.
         """
-        address = 58
+        address = LoadCellsRegisters.DO1_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO1TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do1_target_load_cell(self, value: LoadCellChannel):
+    def write_do1_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1TargetLoadCell register.
 
@@ -895,10 +964,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO1TargetLoadCell register.
         """
-        address = 58
+        address = LoadCellsRegisters.DO1_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1TargetLoadCell")
+
+        return reply
+
     def read_do2_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO2TargetLoadCell register.
@@ -908,14 +980,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO2TargetLoadCell register.
         """
-        address = 59
+        address = LoadCellsRegisters.DO2_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO2TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do2_target_load_cell(self, value: LoadCellChannel):
+    def write_do2_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2TargetLoadCell register.
 
@@ -924,10 +996,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO2TargetLoadCell register.
         """
-        address = 59
+        address = LoadCellsRegisters.DO2_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2TargetLoadCell")
+
+        return reply
+
     def read_do3_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO3TargetLoadCell register.
@@ -937,14 +1012,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO3TargetLoadCell register.
         """
-        address = 60
+        address = LoadCellsRegisters.DO3_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO3TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do3_target_load_cell(self, value: LoadCellChannel):
+    def write_do3_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3TargetLoadCell register.
 
@@ -953,10 +1028,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO3TargetLoadCell register.
         """
-        address = 60
+        address = LoadCellsRegisters.DO3_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3TargetLoadCell")
+
+        return reply
+
     def read_do4_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO4TargetLoadCell register.
@@ -966,14 +1044,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO4TargetLoadCell register.
         """
-        address = 61
+        address = LoadCellsRegisters.DO4_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO4TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO4TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do4_target_load_cell(self, value: LoadCellChannel):
+    def write_do4_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO4TargetLoadCell register.
 
@@ -982,10 +1060,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO4TargetLoadCell register.
         """
-        address = 61
+        address = LoadCellsRegisters.DO4_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO4TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO4TargetLoadCell")
+
+        return reply
+
     def read_do5_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO5TargetLoadCell register.
@@ -995,14 +1076,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO5TargetLoadCell register.
         """
-        address = 62
+        address = LoadCellsRegisters.DO5_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO5TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO5TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do5_target_load_cell(self, value: LoadCellChannel):
+    def write_do5_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO5TargetLoadCell register.
 
@@ -1011,10 +1092,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO5TargetLoadCell register.
         """
-        address = 62
+        address = LoadCellsRegisters.DO5_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO5TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO5TargetLoadCell")
+
+        return reply
+
     def read_do6_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO6TargetLoadCell register.
@@ -1024,14 +1108,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO6TargetLoadCell register.
         """
-        address = 63
+        address = LoadCellsRegisters.DO6_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO6TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO6TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do6_target_load_cell(self, value: LoadCellChannel):
+    def write_do6_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO6TargetLoadCell register.
 
@@ -1040,10 +1124,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO6TargetLoadCell register.
         """
-        address = 63
+        address = LoadCellsRegisters.DO6_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO6TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO6TargetLoadCell")
+
+        return reply
+
     def read_do7_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO7TargetLoadCell register.
@@ -1053,14 +1140,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO7TargetLoadCell register.
         """
-        address = 64
+        address = LoadCellsRegisters.DO7_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO7TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO7TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do7_target_load_cell(self, value: LoadCellChannel):
+    def write_do7_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO7TargetLoadCell register.
 
@@ -1069,10 +1156,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO7TargetLoadCell register.
         """
-        address = 64
+        address = LoadCellsRegisters.DO7_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO7TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO7TargetLoadCell")
+
+        return reply
+
     def read_do8_target_load_cell(self) -> LoadCellChannel:
         """
         Reads the contents of the DO8TargetLoadCell register.
@@ -1082,14 +1172,14 @@ class LoadCells(Device):
         LoadCellChannel
             Value read from the DO8TargetLoadCell register.
         """
-        address = 65
+        address = LoadCellsRegisters.DO8_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO8TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO8TargetLoadCell")
 
-        return reply.payload
+        return LoadCellChannel(reply.payload)
 
-    def write_do8_target_load_cell(self, value: LoadCellChannel):
+    def write_do8_target_load_cell(self, value: LoadCellChannel) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO8TargetLoadCell register.
 
@@ -1098,10 +1188,13 @@ class LoadCells(Device):
         value : LoadCellChannel
             Value to write to the DO8TargetLoadCell register.
         """
-        address = 65
+        address = LoadCellsRegisters.DO8_TARGET_LOAD_CELL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO8TargetLoadCell", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO8TargetLoadCell")
+
+        return reply
+
     def read_do1_threshold(self) -> int:
         """
         Reads the contents of the DO1Threshold register.
@@ -1111,14 +1204,15 @@ class LoadCells(Device):
         int
             Value read from the DO1Threshold register.
         """
-        address = 66
+        address = LoadCellsRegisters.DO1_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO1Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do1_threshold(self, value: int):
+    def write_do1_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1Threshold register.
 
@@ -1127,10 +1221,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO1Threshold register.
         """
-        address = 66
+        address = LoadCellsRegisters.DO1_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1Threshold")
+
+        return reply
+
     def read_do2_threshold(self) -> int:
         """
         Reads the contents of the DO2Threshold register.
@@ -1140,14 +1237,15 @@ class LoadCells(Device):
         int
             Value read from the DO2Threshold register.
         """
-        address = 67
+        address = LoadCellsRegisters.DO2_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO2Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do2_threshold(self, value: int):
+    def write_do2_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2Threshold register.
 
@@ -1156,10 +1254,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO2Threshold register.
         """
-        address = 67
+        address = LoadCellsRegisters.DO2_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2Threshold")
+
+        return reply
+
     def read_do3_threshold(self) -> int:
         """
         Reads the contents of the DO3Threshold register.
@@ -1169,14 +1270,15 @@ class LoadCells(Device):
         int
             Value read from the DO3Threshold register.
         """
-        address = 68
+        address = LoadCellsRegisters.DO3_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO3Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do3_threshold(self, value: int):
+    def write_do3_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3Threshold register.
 
@@ -1185,10 +1287,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO3Threshold register.
         """
-        address = 68
+        address = LoadCellsRegisters.DO3_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3Threshold")
+
+        return reply
+
     def read_do4_threshold(self) -> int:
         """
         Reads the contents of the DO4Threshold register.
@@ -1198,14 +1303,15 @@ class LoadCells(Device):
         int
             Value read from the DO4Threshold register.
         """
-        address = 69
+        address = LoadCellsRegisters.DO4_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO4Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO4Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do4_threshold(self, value: int):
+    def write_do4_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO4Threshold register.
 
@@ -1214,10 +1320,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO4Threshold register.
         """
-        address = 69
+        address = LoadCellsRegisters.DO4_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO4Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO4Threshold")
+
+        return reply
+
     def read_do5_threshold(self) -> int:
         """
         Reads the contents of the DO5Threshold register.
@@ -1227,14 +1336,15 @@ class LoadCells(Device):
         int
             Value read from the DO5Threshold register.
         """
-        address = 70
+        address = LoadCellsRegisters.DO5_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO5Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO5Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do5_threshold(self, value: int):
+    def write_do5_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO5Threshold register.
 
@@ -1243,10 +1353,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO5Threshold register.
         """
-        address = 70
+        address = LoadCellsRegisters.DO5_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO5Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO5Threshold")
+
+        return reply
+
     def read_do6_threshold(self) -> int:
         """
         Reads the contents of the DO6Threshold register.
@@ -1256,14 +1369,15 @@ class LoadCells(Device):
         int
             Value read from the DO6Threshold register.
         """
-        address = 71
+        address = LoadCellsRegisters.DO6_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO6Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO6Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do6_threshold(self, value: int):
+    def write_do6_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO6Threshold register.
 
@@ -1272,10 +1386,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO6Threshold register.
         """
-        address = 71
+        address = LoadCellsRegisters.DO6_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO6Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO6Threshold")
+
+        return reply
+
     def read_do7_threshold(self) -> int:
         """
         Reads the contents of the DO7Threshold register.
@@ -1285,14 +1402,15 @@ class LoadCells(Device):
         int
             Value read from the DO7Threshold register.
         """
-        address = 72
+        address = LoadCellsRegisters.DO7_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO7Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO7Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do7_threshold(self, value: int):
+    def write_do7_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO7Threshold register.
 
@@ -1301,10 +1419,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO7Threshold register.
         """
-        address = 72
+        address = LoadCellsRegisters.DO7_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO7Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO7Threshold")
+
+        return reply
+
     def read_do8_threshold(self) -> int:
         """
         Reads the contents of the DO8Threshold register.
@@ -1314,14 +1435,15 @@ class LoadCells(Device):
         int
             Value read from the DO8Threshold register.
         """
-        address = 73
+        address = LoadCellsRegisters.DO8_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("DO8Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO8Threshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do8_threshold(self, value: int):
+    def write_do8_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO8Threshold register.
 
@@ -1330,10 +1452,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO8Threshold register.
         """
-        address = 73
+        address = LoadCellsRegisters.DO8_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.S16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO8Threshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO8Threshold")
+
+        return reply
+
     def read_do1_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO1TimeAboveThreshold register.
@@ -1343,14 +1468,15 @@ class LoadCells(Device):
         int
             Value read from the DO1TimeAboveThreshold register.
         """
-        address = 74
+        address = LoadCellsRegisters.DO1_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO1TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do1_time_above_threshold(self, value: int):
+    def write_do1_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1TimeAboveThreshold register.
 
@@ -1359,10 +1485,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO1TimeAboveThreshold register.
         """
-        address = 74
+        address = LoadCellsRegisters.DO1_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1TimeAboveThreshold")
+
+        return reply
+
     def read_do2_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO2TimeAboveThreshold register.
@@ -1372,14 +1501,15 @@ class LoadCells(Device):
         int
             Value read from the DO2TimeAboveThreshold register.
         """
-        address = 75
+        address = LoadCellsRegisters.DO2_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO2TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do2_time_above_threshold(self, value: int):
+    def write_do2_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2TimeAboveThreshold register.
 
@@ -1388,10 +1518,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO2TimeAboveThreshold register.
         """
-        address = 75
+        address = LoadCellsRegisters.DO2_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2TimeAboveThreshold")
+
+        return reply
+
     def read_do3_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO3TimeAboveThreshold register.
@@ -1401,14 +1534,15 @@ class LoadCells(Device):
         int
             Value read from the DO3TimeAboveThreshold register.
         """
-        address = 76
+        address = LoadCellsRegisters.DO3_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO3TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do3_time_above_threshold(self, value: int):
+    def write_do3_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3TimeAboveThreshold register.
 
@@ -1417,10 +1551,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO3TimeAboveThreshold register.
         """
-        address = 76
+        address = LoadCellsRegisters.DO3_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3TimeAboveThreshold")
+
+        return reply
+
     def read_do4_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO4TimeAboveThreshold register.
@@ -1430,14 +1567,15 @@ class LoadCells(Device):
         int
             Value read from the DO4TimeAboveThreshold register.
         """
-        address = 77
+        address = LoadCellsRegisters.DO4_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO4TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO4TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do4_time_above_threshold(self, value: int):
+    def write_do4_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO4TimeAboveThreshold register.
 
@@ -1446,10 +1584,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO4TimeAboveThreshold register.
         """
-        address = 77
+        address = LoadCellsRegisters.DO4_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO4TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO4TimeAboveThreshold")
+
+        return reply
+
     def read_do5_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO5TimeAboveThreshold register.
@@ -1459,14 +1600,15 @@ class LoadCells(Device):
         int
             Value read from the DO5TimeAboveThreshold register.
         """
-        address = 78
+        address = LoadCellsRegisters.DO5_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO5TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO5TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do5_time_above_threshold(self, value: int):
+    def write_do5_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO5TimeAboveThreshold register.
 
@@ -1475,10 +1617,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO5TimeAboveThreshold register.
         """
-        address = 78
+        address = LoadCellsRegisters.DO5_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO5TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO5TimeAboveThreshold")
+
+        return reply
+
     def read_do6_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO6TimeAboveThreshold register.
@@ -1488,14 +1633,15 @@ class LoadCells(Device):
         int
             Value read from the DO6TimeAboveThreshold register.
         """
-        address = 79
+        address = LoadCellsRegisters.DO6_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO6TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO6TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do6_time_above_threshold(self, value: int):
+    def write_do6_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO6TimeAboveThreshold register.
 
@@ -1504,10 +1650,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO6TimeAboveThreshold register.
         """
-        address = 79
+        address = LoadCellsRegisters.DO6_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO6TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO6TimeAboveThreshold")
+
+        return reply
+
     def read_do7_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO7TimeAboveThreshold register.
@@ -1517,14 +1666,15 @@ class LoadCells(Device):
         int
             Value read from the DO7TimeAboveThreshold register.
         """
-        address = 80
+        address = LoadCellsRegisters.DO7_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO7TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO7TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do7_time_above_threshold(self, value: int):
+    def write_do7_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO7TimeAboveThreshold register.
 
@@ -1533,10 +1683,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO7TimeAboveThreshold register.
         """
-        address = 80
+        address = LoadCellsRegisters.DO7_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO7TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO7TimeAboveThreshold")
+
+        return reply
+
     def read_do8_time_above_threshold(self) -> int:
         """
         Reads the contents of the DO8TimeAboveThreshold register.
@@ -1546,14 +1699,15 @@ class LoadCells(Device):
         int
             Value read from the DO8TimeAboveThreshold register.
         """
-        address = 81
+        address = LoadCellsRegisters.DO8_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO8TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO8TimeAboveThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do8_time_above_threshold(self, value: int):
+    def write_do8_time_above_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO8TimeAboveThreshold register.
 
@@ -1562,10 +1716,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO8TimeAboveThreshold register.
         """
-        address = 81
+        address = LoadCellsRegisters.DO8_TIME_ABOVE_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO8TimeAboveThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO8TimeAboveThreshold")
+
+        return reply
+
     def read_do1_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO1TimeBelowThreshold register.
@@ -1575,14 +1732,15 @@ class LoadCells(Device):
         int
             Value read from the DO1TimeBelowThreshold register.
         """
-        address = 82
+        address = LoadCellsRegisters.DO1_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO1TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO1TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do1_time_below_threshold(self, value: int):
+    def write_do1_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO1TimeBelowThreshold register.
 
@@ -1591,10 +1749,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO1TimeBelowThreshold register.
         """
-        address = 82
+        address = LoadCellsRegisters.DO1_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO1TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO1TimeBelowThreshold")
+
+        return reply
+
     def read_do2_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO2TimeBelowThreshold register.
@@ -1604,14 +1765,15 @@ class LoadCells(Device):
         int
             Value read from the DO2TimeBelowThreshold register.
         """
-        address = 83
+        address = LoadCellsRegisters.DO2_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO2TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO2TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do2_time_below_threshold(self, value: int):
+    def write_do2_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO2TimeBelowThreshold register.
 
@@ -1620,10 +1782,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO2TimeBelowThreshold register.
         """
-        address = 83
+        address = LoadCellsRegisters.DO2_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO2TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO2TimeBelowThreshold")
+
+        return reply
+
     def read_do3_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO3TimeBelowThreshold register.
@@ -1633,14 +1798,15 @@ class LoadCells(Device):
         int
             Value read from the DO3TimeBelowThreshold register.
         """
-        address = 84
+        address = LoadCellsRegisters.DO3_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO3TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO3TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do3_time_below_threshold(self, value: int):
+    def write_do3_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO3TimeBelowThreshold register.
 
@@ -1649,10 +1815,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO3TimeBelowThreshold register.
         """
-        address = 84
+        address = LoadCellsRegisters.DO3_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO3TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO3TimeBelowThreshold")
+
+        return reply
+
     def read_do4_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO4TimeBelowThreshold register.
@@ -1662,14 +1831,15 @@ class LoadCells(Device):
         int
             Value read from the DO4TimeBelowThreshold register.
         """
-        address = 85
+        address = LoadCellsRegisters.DO4_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO4TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO4TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do4_time_below_threshold(self, value: int):
+    def write_do4_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO4TimeBelowThreshold register.
 
@@ -1678,10 +1848,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO4TimeBelowThreshold register.
         """
-        address = 85
+        address = LoadCellsRegisters.DO4_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO4TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO4TimeBelowThreshold")
+
+        return reply
+
     def read_do5_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO5TimeBelowThreshold register.
@@ -1691,14 +1864,15 @@ class LoadCells(Device):
         int
             Value read from the DO5TimeBelowThreshold register.
         """
-        address = 86
+        address = LoadCellsRegisters.DO5_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO5TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO5TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do5_time_below_threshold(self, value: int):
+    def write_do5_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO5TimeBelowThreshold register.
 
@@ -1707,10 +1881,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO5TimeBelowThreshold register.
         """
-        address = 86
+        address = LoadCellsRegisters.DO5_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO5TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO5TimeBelowThreshold")
+
+        return reply
+
     def read_do6_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO6TimeBelowThreshold register.
@@ -1720,14 +1897,15 @@ class LoadCells(Device):
         int
             Value read from the DO6TimeBelowThreshold register.
         """
-        address = 87
+        address = LoadCellsRegisters.DO6_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO6TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO6TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do6_time_below_threshold(self, value: int):
+    def write_do6_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO6TimeBelowThreshold register.
 
@@ -1736,10 +1914,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO6TimeBelowThreshold register.
         """
-        address = 87
+        address = LoadCellsRegisters.DO6_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO6TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO6TimeBelowThreshold")
+
+        return reply
+
     def read_do7_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO7TimeBelowThreshold register.
@@ -1749,14 +1930,15 @@ class LoadCells(Device):
         int
             Value read from the DO7TimeBelowThreshold register.
         """
-        address = 88
+        address = LoadCellsRegisters.DO7_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO7TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO7TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do7_time_below_threshold(self, value: int):
+    def write_do7_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO7TimeBelowThreshold register.
 
@@ -1765,10 +1947,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO7TimeBelowThreshold register.
         """
-        address = 88
+        address = LoadCellsRegisters.DO7_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO7TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO7TimeBelowThreshold")
+
+        return reply
+
     def read_do8_time_below_threshold(self) -> int:
         """
         Reads the contents of the DO8TimeBelowThreshold register.
@@ -1778,14 +1963,15 @@ class LoadCells(Device):
         int
             Value read from the DO8TimeBelowThreshold register.
         """
-        address = 89
+        address = LoadCellsRegisters.DO8_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("DO8TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO8TimeBelowThreshold")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do8_time_below_threshold(self, value: int):
+    def write_do8_time_below_threshold(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO8TimeBelowThreshold register.
 
@@ -1794,10 +1980,13 @@ class LoadCells(Device):
         value : int
             Value to write to the DO8TimeBelowThreshold register.
         """
-        address = 89
+        address = LoadCellsRegisters.DO8_TIME_BELOW_THRESHOLD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("DO8TimeBelowThreshold", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO8TimeBelowThreshold")
+
+        return reply
+
     def read_enable_events(self) -> LoadCellEvents:
         """
         Reads the contents of the EnableEvents register.
@@ -1807,14 +1996,14 @@ class LoadCells(Device):
         LoadCellEvents
             Value read from the EnableEvents register.
         """
-        address = 90
+        address = LoadCellsRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableEvents")
 
-        return reply.payload
+        return LoadCellEvents(reply.payload)
 
-    def write_enable_events(self, value: LoadCellEvents):
+    def write_enable_events(self, value: LoadCellEvents) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -1823,7 +2012,10 @@ class LoadCells(Device):
         value : LoadCellEvents
             Value to write to the EnableEvents register.
         """
-        address = 90
+        address = LoadCellsRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableEvents")
+
+        return reply
+

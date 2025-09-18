@@ -1,1 +1,1 @@
-::: harp.devices.loadcells.harpdevice
+::: harp.devices.loadcells

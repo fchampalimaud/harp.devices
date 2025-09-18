@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 @dataclass
 class DigitalOutputSyncPayload:
@@ -132,7 +131,7 @@ class LedArrayEvents(IntFlag):
     DIGITAL_INPUT_STATE = 0x2
 
 
-class DO0SyncConfig(Enum):
+class DO0SyncConfig(IntEnum):
     """
     Available configurations when using digital output pin 0 to report firmware events.
 
@@ -154,7 +153,7 @@ class DO0SyncConfig(Enum):
     MIMIC_LED0_ENABLE_LED = 3
 
 
-class DO1SyncConfig(Enum):
+class DO1SyncConfig(IntEnum):
     """
     Available configurations when using digital output pin 1 to report firmware events.
 
@@ -176,7 +175,7 @@ class DO1SyncConfig(Enum):
     MIMIC_LED1_ENABLE_LED = 48
 
 
-class DigitalInputTriggerConfig(Enum):
+class DigitalInputTriggerConfig(IntEnum):
     """
     Available configurations when using digital inputs as an acquisition trigger.
 
@@ -207,7 +206,7 @@ class DigitalInputTriggerConfig(Enum):
     NONE = 6
 
 
-class PulseModeConfig(Enum):
+class PulseModeConfig(IntEnum):
     """
     Available configurations modes when LED behavior is enabled.
 
@@ -223,7 +222,7 @@ class PulseModeConfig(Enum):
     PULSE_TIME = 1
 
 
-class LedArrayRegisters(Enum):
+class LedArrayRegisters(IntEnum):
     """Enum for all available registers in the LedArray device.
 
     Attributes
@@ -295,6 +294,7 @@ class LedArrayRegisters(Enum):
     ENABLE_EVENTS : int
         Specifies all the active events in the device.
     """
+
     ENABLE_POWER = 32
     ENABLE_LED_MODE = 33
     ENABLE_LED = 34
@@ -353,14 +353,14 @@ class LedArray(Device):
         LedState
             Value read from the EnablePower register.
         """
-        address = 32
+        address = LedArrayRegisters.ENABLE_POWER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnablePower", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnablePower")
 
-        return reply.payload
+        return LedState(reply.payload)
 
-    def write_enable_power(self, value: LedState):
+    def write_enable_power(self, value: LedState) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnablePower register.
 
@@ -369,10 +369,13 @@ class LedArray(Device):
         value : LedState
             Value to write to the EnablePower register.
         """
-        address = 32
+        address = LedArrayRegisters.ENABLE_POWER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnablePower", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnablePower")
+
+        return reply
+
     def read_enable_led_mode(self) -> LedState:
         """
         Reads the contents of the EnableLedMode register.
@@ -382,14 +385,14 @@ class LedArray(Device):
         LedState
             Value read from the EnableLedMode register.
         """
-        address = 33
+        address = LedArrayRegisters.ENABLE_LED_MODE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableLedMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableLedMode")
 
-        return reply.payload
+        return LedState(reply.payload)
 
-    def write_enable_led_mode(self, value: LedState):
+    def write_enable_led_mode(self, value: LedState) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableLedMode register.
 
@@ -398,10 +401,13 @@ class LedArray(Device):
         value : LedState
             Value to write to the EnableLedMode register.
         """
-        address = 33
+        address = LedArrayRegisters.ENABLE_LED_MODE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableLedMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableLedMode")
+
+        return reply
+
     def read_enable_led(self) -> LedState:
         """
         Reads the contents of the EnableLed register.
@@ -411,14 +417,14 @@ class LedArray(Device):
         LedState
             Value read from the EnableLed register.
         """
-        address = 34
+        address = LedArrayRegisters.ENABLE_LED
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableLed", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableLed")
 
-        return reply.payload
+        return LedState(reply.payload)
 
-    def write_enable_led(self, value: LedState):
+    def write_enable_led(self, value: LedState) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableLed register.
 
@@ -427,10 +433,13 @@ class LedArray(Device):
         value : LedState
             Value to write to the EnableLed register.
         """
-        address = 34
+        address = LedArrayRegisters.ENABLE_LED
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableLed", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableLed")
+
+        return reply
+
     def read_digital_input_state(self) -> DigitalInputs:
         """
         Reads the contents of the DigitalInputState register.
@@ -440,12 +449,12 @@ class LedArray(Device):
         DigitalInputs
             Value read from the DigitalInputState register.
         """
-        address = 35
+        address = LedArrayRegisters.DIGITAL_INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_digital_output_sync(self) -> DigitalOutputSyncPayload:
         """
@@ -456,14 +465,19 @@ class LedArray(Device):
         DigitalOutputSyncPayload
             Value read from the DigitalOutputSync register.
         """
-        address = 36
+        address = LedArrayRegisters.DIGITAL_OUTPUT_SYNC
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputSync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputSync")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return DigitalOutputSyncPayload(
+            DO0Sync=payload[0],
+            DO1Sync=payload[1]
+        )
 
-    def write_digital_output_sync(self, value: DigitalOutputSyncPayload):
+    def write_digital_output_sync(self, value: DigitalOutputSyncPayload) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputSync register.
 
@@ -472,10 +486,13 @@ class LedArray(Device):
         value : DigitalOutputSyncPayload
             Value to write to the DigitalOutputSync register.
         """
-        address = 36
+        address = LedArrayRegisters.DIGITAL_OUTPUT_SYNC
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputSync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputSync")
+
+        return reply
+
     def read_digital_input_trigger(self) -> DigitalInputTriggerPayload:
         """
         Reads the contents of the DigitalInputTrigger register.
@@ -485,14 +502,19 @@ class LedArray(Device):
         DigitalInputTriggerPayload
             Value read from the DigitalInputTrigger register.
         """
-        address = 37
+        address = LedArrayRegisters.DIGITAL_INPUT_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputTrigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputTrigger")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return DigitalInputTriggerPayload(
+            DI0Trigger=payload[0],
+            DI1Trigger=payload[1]
+        )
 
-    def write_digital_input_trigger(self, value: DigitalInputTriggerPayload):
+    def write_digital_input_trigger(self, value: DigitalInputTriggerPayload) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalInputTrigger register.
 
@@ -501,10 +523,13 @@ class LedArray(Device):
         value : DigitalInputTriggerPayload
             Value to write to the DigitalInputTrigger register.
         """
-        address = 37
+        address = LedArrayRegisters.DIGITAL_INPUT_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalInputTrigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalInputTrigger")
+
+        return reply
+
     def read_pulse_mode(self) -> PulseModePayload:
         """
         Reads the contents of the PulseMode register.
@@ -514,14 +539,19 @@ class LedArray(Device):
         PulseModePayload
             Value read from the PulseMode register.
         """
-        address = 38
+        address = LedArrayRegisters.PULSE_MODE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseMode")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return PulseModePayload(
+            Led0Mode=payload[0],
+            Led1Mode=payload[1]
+        )
 
-    def write_pulse_mode(self, value: PulseModePayload):
+    def write_pulse_mode(self, value: PulseModePayload) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseMode register.
 
@@ -530,10 +560,13 @@ class LedArray(Device):
         value : PulseModePayload
             Value to write to the PulseMode register.
         """
-        address = 38
+        address = LedArrayRegisters.PULSE_MODE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseMode")
+
+        return reply
+
     def read_led0_power(self) -> int:
         """
         Reads the contents of the Led0Power register.
@@ -543,14 +576,15 @@ class LedArray(Device):
         int
             Value read from the Led0Power register.
         """
-        address = 39
+        address = LedArrayRegisters.LED0_POWER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Led0Power", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0Power")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_power(self, value: int):
+    def write_led0_power(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0Power register.
 
@@ -559,10 +593,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0Power register.
         """
-        address = 39
+        address = LedArrayRegisters.LED0_POWER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0Power", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0Power")
+
+        return reply
+
     def read_led1_power(self) -> int:
         """
         Reads the contents of the Led1Power register.
@@ -572,14 +609,15 @@ class LedArray(Device):
         int
             Value read from the Led1Power register.
         """
-        address = 40
+        address = LedArrayRegisters.LED1_POWER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Led1Power", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1Power")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_power(self, value: int):
+    def write_led1_power(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1Power register.
 
@@ -588,10 +626,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1Power register.
         """
-        address = 40
+        address = LedArrayRegisters.LED1_POWER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1Power", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1Power")
+
+        return reply
+
     def read_led0_pwm_frequency(self) -> float:
         """
         Reads the contents of the Led0PwmFrequency register.
@@ -601,14 +642,15 @@ class LedArray(Device):
         float
             Value read from the Led0PwmFrequency register.
         """
-        address = 41
+        address = LedArrayRegisters.LED0_PWM_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led0PwmFrequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PwmFrequency")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pwm_frequency(self, value: float):
+    def write_led0_pwm_frequency(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PwmFrequency register.
 
@@ -617,10 +659,13 @@ class LedArray(Device):
         value : float
             Value to write to the Led0PwmFrequency register.
         """
-        address = 41
+        address = LedArrayRegisters.LED0_PWM_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PwmFrequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PwmFrequency")
+
+        return reply
+
     def read_led0_pwm_duty_cycle(self) -> float:
         """
         Reads the contents of the Led0PwmDutyCycle register.
@@ -630,14 +675,15 @@ class LedArray(Device):
         float
             Value read from the Led0PwmDutyCycle register.
         """
-        address = 42
+        address = LedArrayRegisters.LED0_PWM_DUTY_CYCLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led0PwmDutyCycle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PwmDutyCycle")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pwm_duty_cycle(self, value: float):
+    def write_led0_pwm_duty_cycle(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PwmDutyCycle register.
 
@@ -646,10 +692,13 @@ class LedArray(Device):
         value : float
             Value to write to the Led0PwmDutyCycle register.
         """
-        address = 42
+        address = LedArrayRegisters.LED0_PWM_DUTY_CYCLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PwmDutyCycle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PwmDutyCycle")
+
+        return reply
+
     def read_led0_pwm_pulse_counter(self) -> int:
         """
         Reads the contents of the Led0PwmPulseCounter register.
@@ -659,14 +708,15 @@ class LedArray(Device):
         int
             Value read from the Led0PwmPulseCounter register.
         """
-        address = 43
+        address = LedArrayRegisters.LED0_PWM_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led0PwmPulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PwmPulseCounter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pwm_pulse_counter(self, value: int):
+    def write_led0_pwm_pulse_counter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PwmPulseCounter register.
 
@@ -675,10 +725,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0PwmPulseCounter register.
         """
-        address = 43
+        address = LedArrayRegisters.LED0_PWM_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PwmPulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PwmPulseCounter")
+
+        return reply
+
     def read_led0_pulse_time_on(self) -> int:
         """
         Reads the contents of the Led0PulseTimeOn register.
@@ -688,14 +741,15 @@ class LedArray(Device):
         int
             Value read from the Led0PulseTimeOn register.
         """
-        address = 44
+        address = LedArrayRegisters.LED0_PULSE_TIME_ON
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led0PulseTimeOn", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PulseTimeOn")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pulse_time_on(self, value: int):
+    def write_led0_pulse_time_on(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PulseTimeOn register.
 
@@ -704,10 +758,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0PulseTimeOn register.
         """
-        address = 44
+        address = LedArrayRegisters.LED0_PULSE_TIME_ON
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PulseTimeOn", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PulseTimeOn")
+
+        return reply
+
     def read_led0_pulse_time_off(self) -> int:
         """
         Reads the contents of the Led0PulseTimeOff register.
@@ -717,14 +774,15 @@ class LedArray(Device):
         int
             Value read from the Led0PulseTimeOff register.
         """
-        address = 45
+        address = LedArrayRegisters.LED0_PULSE_TIME_OFF
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led0PulseTimeOff", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PulseTimeOff")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pulse_time_off(self, value: int):
+    def write_led0_pulse_time_off(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PulseTimeOff register.
 
@@ -733,10 +791,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0PulseTimeOff register.
         """
-        address = 45
+        address = LedArrayRegisters.LED0_PULSE_TIME_OFF
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PulseTimeOff", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PulseTimeOff")
+
+        return reply
+
     def read_led0_pulse_time_pulse_counter(self) -> int:
         """
         Reads the contents of the Led0PulseTimePulseCounter register.
@@ -746,14 +807,15 @@ class LedArray(Device):
         int
             Value read from the Led0PulseTimePulseCounter register.
         """
-        address = 46
+        address = LedArrayRegisters.LED0_PULSE_TIME_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led0PulseTimePulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PulseTimePulseCounter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pulse_time_pulse_counter(self, value: int):
+    def write_led0_pulse_time_pulse_counter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PulseTimePulseCounter register.
 
@@ -762,10 +824,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0PulseTimePulseCounter register.
         """
-        address = 46
+        address = LedArrayRegisters.LED0_PULSE_TIME_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PulseTimePulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PulseTimePulseCounter")
+
+        return reply
+
     def read_led0_pulse_time_tail(self) -> int:
         """
         Reads the contents of the Led0PulseTimeTail register.
@@ -775,14 +840,15 @@ class LedArray(Device):
         int
             Value read from the Led0PulseTimeTail register.
         """
-        address = 47
+        address = LedArrayRegisters.LED0_PULSE_TIME_TAIL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led0PulseTimeTail", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PulseTimeTail")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pulse_time_tail(self, value: int):
+    def write_led0_pulse_time_tail(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PulseTimeTail register.
 
@@ -791,10 +857,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0PulseTimeTail register.
         """
-        address = 47
+        address = LedArrayRegisters.LED0_PULSE_TIME_TAIL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PulseTimeTail", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PulseTimeTail")
+
+        return reply
+
     def read_led0_pulse_repeat_counter(self) -> int:
         """
         Reads the contents of the Led0PulseRepeatCounter register.
@@ -804,14 +873,15 @@ class LedArray(Device):
         int
             Value read from the Led0PulseRepeatCounter register.
         """
-        address = 48
+        address = LedArrayRegisters.LED0_PULSE_REPEAT_COUNTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led0PulseRepeatCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PulseRepeatCounter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_pulse_repeat_counter(self, value: int):
+    def write_led0_pulse_repeat_counter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0PulseRepeatCounter register.
 
@@ -820,10 +890,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led0PulseRepeatCounter register.
         """
-        address = 48
+        address = LedArrayRegisters.LED0_PULSE_REPEAT_COUNTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0PulseRepeatCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0PulseRepeatCounter")
+
+        return reply
+
     def read_led1_pwm_frequency(self) -> float:
         """
         Reads the contents of the Led1PwmFrequency register.
@@ -833,14 +906,15 @@ class LedArray(Device):
         float
             Value read from the Led1PwmFrequency register.
         """
-        address = 49
+        address = LedArrayRegisters.LED1_PWM_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led1PwmFrequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PwmFrequency")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pwm_frequency(self, value: float):
+    def write_led1_pwm_frequency(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PwmFrequency register.
 
@@ -849,10 +923,13 @@ class LedArray(Device):
         value : float
             Value to write to the Led1PwmFrequency register.
         """
-        address = 49
+        address = LedArrayRegisters.LED1_PWM_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PwmFrequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PwmFrequency")
+
+        return reply
+
     def read_led1_pwm_duty_cycle(self) -> float:
         """
         Reads the contents of the Led1PwmDutyCycle register.
@@ -862,14 +939,15 @@ class LedArray(Device):
         float
             Value read from the Led1PwmDutyCycle register.
         """
-        address = 50
+        address = LedArrayRegisters.LED1_PWM_DUTY_CYCLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led1PwmDutyCycle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PwmDutyCycle")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pwm_duty_cycle(self, value: float):
+    def write_led1_pwm_duty_cycle(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PwmDutyCycle register.
 
@@ -878,10 +956,13 @@ class LedArray(Device):
         value : float
             Value to write to the Led1PwmDutyCycle register.
         """
-        address = 50
+        address = LedArrayRegisters.LED1_PWM_DUTY_CYCLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PwmDutyCycle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PwmDutyCycle")
+
+        return reply
+
     def read_led1_pwm_pulse_counter(self) -> int:
         """
         Reads the contents of the Led1PwmPulseCounter register.
@@ -891,14 +972,15 @@ class LedArray(Device):
         int
             Value read from the Led1PwmPulseCounter register.
         """
-        address = 51
+        address = LedArrayRegisters.LED1_PWM_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led1PwmPulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PwmPulseCounter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pwm_pulse_counter(self, value: int):
+    def write_led1_pwm_pulse_counter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PwmPulseCounter register.
 
@@ -907,10 +989,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1PwmPulseCounter register.
         """
-        address = 51
+        address = LedArrayRegisters.LED1_PWM_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PwmPulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PwmPulseCounter")
+
+        return reply
+
     def read_led1_pulse_time_on(self) -> int:
         """
         Reads the contents of the Led1PulseTimeOn register.
@@ -920,14 +1005,15 @@ class LedArray(Device):
         int
             Value read from the Led1PulseTimeOn register.
         """
-        address = 52
+        address = LedArrayRegisters.LED1_PULSE_TIME_ON
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led1PulseTimeOn", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PulseTimeOn")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pulse_time_on(self, value: int):
+    def write_led1_pulse_time_on(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PulseTimeOn register.
 
@@ -936,10 +1022,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1PulseTimeOn register.
         """
-        address = 52
+        address = LedArrayRegisters.LED1_PULSE_TIME_ON
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PulseTimeOn", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PulseTimeOn")
+
+        return reply
+
     def read_led1_pulse_time_off(self) -> int:
         """
         Reads the contents of the Led1PulseTimeOff register.
@@ -949,14 +1038,15 @@ class LedArray(Device):
         int
             Value read from the Led1PulseTimeOff register.
         """
-        address = 53
+        address = LedArrayRegisters.LED1_PULSE_TIME_OFF
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led1PulseTimeOff", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PulseTimeOff")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pulse_time_off(self, value: int):
+    def write_led1_pulse_time_off(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PulseTimeOff register.
 
@@ -965,10 +1055,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1PulseTimeOff register.
         """
-        address = 53
+        address = LedArrayRegisters.LED1_PULSE_TIME_OFF
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PulseTimeOff", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PulseTimeOff")
+
+        return reply
+
     def read_led1_pulse_time_pulse_counter(self) -> int:
         """
         Reads the contents of the Led1PulseTimePulseCounter register.
@@ -978,14 +1071,15 @@ class LedArray(Device):
         int
             Value read from the Led1PulseTimePulseCounter register.
         """
-        address = 54
+        address = LedArrayRegisters.LED1_PULSE_TIME_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led1PulseTimePulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PulseTimePulseCounter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pulse_time_pulse_counter(self, value: int):
+    def write_led1_pulse_time_pulse_counter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PulseTimePulseCounter register.
 
@@ -994,10 +1088,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1PulseTimePulseCounter register.
         """
-        address = 54
+        address = LedArrayRegisters.LED1_PULSE_TIME_PULSE_COUNTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PulseTimePulseCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PulseTimePulseCounter")
+
+        return reply
+
     def read_led1_pulse_time_tail(self) -> int:
         """
         Reads the contents of the Led1PulseTimeTail register.
@@ -1007,14 +1104,15 @@ class LedArray(Device):
         int
             Value read from the Led1PulseTimeTail register.
         """
-        address = 55
+        address = LedArrayRegisters.LED1_PULSE_TIME_TAIL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led1PulseTimeTail", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PulseTimeTail")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pulse_time_tail(self, value: int):
+    def write_led1_pulse_time_tail(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PulseTimeTail register.
 
@@ -1023,10 +1121,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1PulseTimeTail register.
         """
-        address = 55
+        address = LedArrayRegisters.LED1_PULSE_TIME_TAIL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PulseTimeTail", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PulseTimeTail")
+
+        return reply
+
     def read_led1_pulse_repeat_counter(self) -> int:
         """
         Reads the contents of the Led1PulseRepeatCounter register.
@@ -1036,14 +1137,15 @@ class LedArray(Device):
         int
             Value read from the Led1PulseRepeatCounter register.
         """
-        address = 56
+        address = LedArrayRegisters.LED1_PULSE_REPEAT_COUNTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Led1PulseRepeatCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PulseRepeatCounter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_pulse_repeat_counter(self, value: int):
+    def write_led1_pulse_repeat_counter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1PulseRepeatCounter register.
 
@@ -1052,10 +1154,13 @@ class LedArray(Device):
         value : int
             Value to write to the Led1PulseRepeatCounter register.
         """
-        address = 56
+        address = LedArrayRegisters.LED1_PULSE_REPEAT_COUNTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1PulseRepeatCounter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1PulseRepeatCounter")
+
+        return reply
+
     def read_led0_pwm_real(self) -> float:
         """
         Reads the contents of the Led0PwmReal register.
@@ -1065,11 +1170,12 @@ class LedArray(Device):
         float
             Value read from the Led0PwmReal register.
         """
-        address = 57
+        address = LedArrayRegisters.LED0_PWM_REAL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led0PwmReal", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PwmReal")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
     def read_led0_pwm_duty_cycle_real(self) -> float:
@@ -1081,11 +1187,12 @@ class LedArray(Device):
         float
             Value read from the Led0PwmDutyCycleReal register.
         """
-        address = 58
+        address = LedArrayRegisters.LED0_PWM_DUTY_CYCLE_REAL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led0PwmDutyCycleReal", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0PwmDutyCycleReal")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
     def read_led1_pwm_real(self) -> float:
@@ -1097,11 +1204,12 @@ class LedArray(Device):
         float
             Value read from the Led1PwmReal register.
         """
-        address = 59
+        address = LedArrayRegisters.LED1_PWM_REAL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led1PwmReal", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1PwmReal")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
     def read_led_d1_pwm_duty_cycle_real(self) -> float:
@@ -1113,11 +1221,12 @@ class LedArray(Device):
         float
             Value read from the LedD1PwmDutyCycleReal register.
         """
-        address = 60
+        address = LedArrayRegisters.LED_D1_PWM_DUTY_CYCLE_REAL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("LedD1PwmDutyCycleReal", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("LedD1PwmDutyCycleReal")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
     def read_aux_digital_output_state(self) -> AuxDigitalOutputs:
@@ -1129,14 +1238,14 @@ class LedArray(Device):
         AuxDigitalOutputs
             Value read from the AuxDigitalOutputState register.
         """
-        address = 61
+        address = LedArrayRegisters.AUX_DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("AuxDigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AuxDigitalOutputState")
 
-        return reply.payload
+        return AuxDigitalOutputs(reply.payload)
 
-    def write_aux_digital_output_state(self, value: AuxDigitalOutputs):
+    def write_aux_digital_output_state(self, value: AuxDigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the AuxDigitalOutputState register.
 
@@ -1145,10 +1254,13 @@ class LedArray(Device):
         value : AuxDigitalOutputs
             Value to write to the AuxDigitalOutputState register.
         """
-        address = 61
+        address = LedArrayRegisters.AUX_DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("AuxDigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AuxDigitalOutputState")
+
+        return reply
+
     def read_aux_led_power(self) -> int:
         """
         Reads the contents of the AuxLedPower register.
@@ -1158,14 +1270,15 @@ class LedArray(Device):
         int
             Value read from the AuxLedPower register.
         """
-        address = 62
+        address = LedArrayRegisters.AUX_LED_POWER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("AuxLedPower", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AuxLedPower")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_aux_led_power(self, value: int):
+    def write_aux_led_power(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the AuxLedPower register.
 
@@ -1174,10 +1287,13 @@ class LedArray(Device):
         value : int
             Value to write to the AuxLedPower register.
         """
-        address = 62
+        address = LedArrayRegisters.AUX_LED_POWER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("AuxLedPower", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("AuxLedPower")
+
+        return reply
+
     def read_digital_output_state(self) -> DigitalOutputs:
         """
         Reads the contents of the DigitalOutputState register.
@@ -1187,14 +1303,14 @@ class LedArray(Device):
         DigitalOutputs
             Value read from the DigitalOutputState register.
         """
-        address = 63
+        address = LedArrayRegisters.DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalOutputState")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_digital_output_state(self, value: DigitalOutputs):
+    def write_digital_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DigitalOutputState register.
 
@@ -1203,10 +1319,13 @@ class LedArray(Device):
         value : DigitalOutputs
             Value to write to the DigitalOutputState register.
         """
-        address = 63
+        address = LedArrayRegisters.DIGITAL_OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DigitalOutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DigitalOutputState")
+
+        return reply
+
     def read_enable_events(self) -> LedArrayEvents:
         """
         Reads the contents of the EnableEvents register.
@@ -1216,14 +1335,14 @@ class LedArray(Device):
         LedArrayEvents
             Value read from the EnableEvents register.
         """
-        address = 65
+        address = LedArrayRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableEvents")
 
-        return reply.payload
+        return LedArrayEvents(reply.payload)
 
-    def write_enable_events(self, value: LedArrayEvents):
+    def write_enable_events(self, value: LedArrayEvents) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -1232,7 +1351,10 @@ class LedArray(Device):
         value : LedArrayEvents
             Value to write to the EnableEvents register.
         """
-        address = 65
+        address = LedArrayRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableEvents")
+
+        return reply
+

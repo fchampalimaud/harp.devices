@@ -1,1 +1,1 @@
-::: harp.devices.olfactometer.harpdevice
+::: harp.devices.olfactometer

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 
 class DigitalInputs(IntFlag):
@@ -96,7 +95,7 @@ class CurrentDriverEvents(IntFlag):
     DIS = 0x1
 
 
-class CurrentDriverRegisters(Enum):
+class CurrentDriverRegisters(IntEnum):
     """Enum for all available registers in the CurrentDriver device.
 
     Attributes
@@ -148,6 +147,7 @@ class CurrentDriverRegisters(Enum):
     ENABLE_EVENTS : int
         Specifies the active events in the device
     """
+
     DIGITAL_INPUT_STATE = 32
     OUTPUT_SET = 33
     OUTPUT_CLEAR = 34
@@ -196,12 +196,12 @@ class CurrentDriver(Device):
         DigitalInputs
             Value read from the DigitalInputState register.
         """
-        address = 32
+        address = CurrentDriverRegisters.DIGITAL_INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_output_set(self) -> DigitalOutputs:
         """
@@ -212,14 +212,14 @@ class CurrentDriver(Device):
         DigitalOutputs
             Value read from the OutputSet register.
         """
-        address = 33
+        address = CurrentDriverRegisters.OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputSet")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_set(self, value: DigitalOutputs):
+    def write_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputSet register.
 
@@ -228,10 +228,13 @@ class CurrentDriver(Device):
         value : DigitalOutputs
             Value to write to the OutputSet register.
         """
-        address = 33
+        address = CurrentDriverRegisters.OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputSet")
+
+        return reply
+
     def read_output_clear(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputClear register.
@@ -241,14 +244,14 @@ class CurrentDriver(Device):
         DigitalOutputs
             Value read from the OutputClear register.
         """
-        address = 34
+        address = CurrentDriverRegisters.OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputClear")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_clear(self, value: DigitalOutputs):
+    def write_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputClear register.
 
@@ -257,10 +260,13 @@ class CurrentDriver(Device):
         value : DigitalOutputs
             Value to write to the OutputClear register.
         """
-        address = 34
+        address = CurrentDriverRegisters.OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputClear")
+
+        return reply
+
     def read_output_toggle(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputToggle register.
@@ -270,14 +276,14 @@ class CurrentDriver(Device):
         DigitalOutputs
             Value read from the OutputToggle register.
         """
-        address = 35
+        address = CurrentDriverRegisters.OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputToggle")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_toggle(self, value: DigitalOutputs):
+    def write_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputToggle register.
 
@@ -286,10 +292,13 @@ class CurrentDriver(Device):
         value : DigitalOutputs
             Value to write to the OutputToggle register.
         """
-        address = 35
+        address = CurrentDriverRegisters.OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputToggle")
+
+        return reply
+
     def read_output_state(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputState register.
@@ -299,14 +308,14 @@ class CurrentDriver(Device):
         DigitalOutputs
             Value read from the OutputState register.
         """
-        address = 36
+        address = CurrentDriverRegisters.OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputState")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_state(self, value: DigitalOutputs):
+    def write_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputState register.
 
@@ -315,10 +324,13 @@ class CurrentDriver(Device):
         value : DigitalOutputs
             Value to write to the OutputState register.
         """
-        address = 36
+        address = CurrentDriverRegisters.OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputState")
+
+        return reply
+
     def read_led0_current(self) -> float:
         """
         Reads the contents of the Led0Current register.
@@ -328,14 +340,15 @@ class CurrentDriver(Device):
         float
             Value read from the Led0Current register.
         """
-        address = 37
+        address = CurrentDriverRegisters.LED0_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led0Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0Current")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_current(self, value: float):
+    def write_led0_current(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0Current register.
 
@@ -344,10 +357,13 @@ class CurrentDriver(Device):
         value : float
             Value to write to the Led0Current register.
         """
-        address = 37
+        address = CurrentDriverRegisters.LED0_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0Current")
+
+        return reply
+
     def read_led1_current(self) -> float:
         """
         Reads the contents of the Led1Current register.
@@ -357,14 +373,15 @@ class CurrentDriver(Device):
         float
             Value read from the Led1Current register.
         """
-        address = 38
+        address = CurrentDriverRegisters.LED1_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led1Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1Current")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_current(self, value: float):
+    def write_led1_current(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1Current register.
 
@@ -373,10 +390,13 @@ class CurrentDriver(Device):
         value : float
             Value to write to the Led1Current register.
         """
-        address = 38
+        address = CurrentDriverRegisters.LED1_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1Current")
+
+        return reply
+
     def read_dac0_voltage(self) -> float:
         """
         Reads the contents of the Dac0Voltage register.
@@ -386,14 +406,15 @@ class CurrentDriver(Device):
         float
             Value read from the Dac0Voltage register.
         """
-        address = 39
+        address = CurrentDriverRegisters.DAC0_VOLTAGE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Dac0Voltage", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Dac0Voltage")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_dac0_voltage(self, value: float):
+    def write_dac0_voltage(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Dac0Voltage register.
 
@@ -402,10 +423,13 @@ class CurrentDriver(Device):
         value : float
             Value to write to the Dac0Voltage register.
         """
-        address = 39
+        address = CurrentDriverRegisters.DAC0_VOLTAGE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Dac0Voltage", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Dac0Voltage")
+
+        return reply
+
     def read_dac1_voltage(self) -> float:
         """
         Reads the contents of the Dac1Voltage register.
@@ -415,14 +439,15 @@ class CurrentDriver(Device):
         float
             Value read from the Dac1Voltage register.
         """
-        address = 40
+        address = CurrentDriverRegisters.DAC1_VOLTAGE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Dac1Voltage", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Dac1Voltage")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_dac1_voltage(self, value: float):
+    def write_dac1_voltage(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Dac1Voltage register.
 
@@ -431,10 +456,13 @@ class CurrentDriver(Device):
         value : float
             Value to write to the Dac1Voltage register.
         """
-        address = 40
+        address = CurrentDriverRegisters.DAC1_VOLTAGE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Dac1Voltage", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Dac1Voltage")
+
+        return reply
+
     def read_led_enable(self) -> LedOutputs:
         """
         Reads the contents of the LedEnable register.
@@ -444,14 +472,14 @@ class CurrentDriver(Device):
         LedOutputs
             Value read from the LedEnable register.
         """
-        address = 41
+        address = CurrentDriverRegisters.LED_ENABLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("LedEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("LedEnable")
 
-        return reply.payload
+        return LedOutputs(reply.payload)
 
-    def write_led_enable(self, value: LedOutputs):
+    def write_led_enable(self, value: LedOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the LedEnable register.
 
@@ -460,10 +488,13 @@ class CurrentDriver(Device):
         value : LedOutputs
             Value to write to the LedEnable register.
         """
-        address = 41
+        address = CurrentDriverRegisters.LED_ENABLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("LedEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("LedEnable")
+
+        return reply
+
     def read_led_disable(self) -> LedOutputs:
         """
         Reads the contents of the LedDisable register.
@@ -473,14 +504,14 @@ class CurrentDriver(Device):
         LedOutputs
             Value read from the LedDisable register.
         """
-        address = 42
+        address = CurrentDriverRegisters.LED_DISABLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("LedDisable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("LedDisable")
 
-        return reply.payload
+        return LedOutputs(reply.payload)
 
-    def write_led_disable(self, value: LedOutputs):
+    def write_led_disable(self, value: LedOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the LedDisable register.
 
@@ -489,10 +520,13 @@ class CurrentDriver(Device):
         value : LedOutputs
             Value to write to the LedDisable register.
         """
-        address = 42
+        address = CurrentDriverRegisters.LED_DISABLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("LedDisable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("LedDisable")
+
+        return reply
+
     def read_led_state(self) -> LedOutputs:
         """
         Reads the contents of the LedState register.
@@ -502,14 +536,14 @@ class CurrentDriver(Device):
         LedOutputs
             Value read from the LedState register.
         """
-        address = 43
+        address = CurrentDriverRegisters.LED_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("LedState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("LedState")
 
-        return reply.payload
+        return LedOutputs(reply.payload)
 
-    def write_led_state(self, value: LedOutputs):
+    def write_led_state(self, value: LedOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the LedState register.
 
@@ -518,10 +552,13 @@ class CurrentDriver(Device):
         value : LedOutputs
             Value to write to the LedState register.
         """
-        address = 43
+        address = CurrentDriverRegisters.LED_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("LedState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("LedState")
+
+        return reply
+
     def read_led0_max_current(self) -> float:
         """
         Reads the contents of the Led0MaxCurrent register.
@@ -531,14 +568,15 @@ class CurrentDriver(Device):
         float
             Value read from the Led0MaxCurrent register.
         """
-        address = 44
+        address = CurrentDriverRegisters.LED0_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led0MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0MaxCurrent")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_max_current(self, value: float):
+    def write_led0_max_current(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0MaxCurrent register.
 
@@ -547,10 +585,13 @@ class CurrentDriver(Device):
         value : float
             Value to write to the Led0MaxCurrent register.
         """
-        address = 44
+        address = CurrentDriverRegisters.LED0_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0MaxCurrent")
+
+        return reply
+
     def read_led1_max_current(self) -> float:
         """
         Reads the contents of the Led1MaxCurrent register.
@@ -560,14 +601,15 @@ class CurrentDriver(Device):
         float
             Value read from the Led1MaxCurrent register.
         """
-        address = 45
+        address = CurrentDriverRegisters.LED1_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.Float))
-        if reply.is_error:
-            raise HarpReadException("Led1MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1MaxCurrent")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_max_current(self, value: float):
+    def write_led1_max_current(self, value: float) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1MaxCurrent register.
 
@@ -576,10 +618,13 @@ class CurrentDriver(Device):
         value : float
             Value to write to the Led1MaxCurrent register.
         """
-        address = 45
+        address = CurrentDriverRegisters.LED1_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.Float, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1MaxCurrent")
+
+        return reply
+
     def read_pulse_enable(self) -> LedOutputs:
         """
         Reads the contents of the PulseEnable register.
@@ -589,14 +634,14 @@ class CurrentDriver(Device):
         LedOutputs
             Value read from the PulseEnable register.
         """
-        address = 46
+        address = CurrentDriverRegisters.PULSE_ENABLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseEnable")
 
-        return reply.payload
+        return LedOutputs(reply.payload)
 
-    def write_pulse_enable(self, value: LedOutputs):
+    def write_pulse_enable(self, value: LedOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseEnable register.
 
@@ -605,10 +650,13 @@ class CurrentDriver(Device):
         value : LedOutputs
             Value to write to the PulseEnable register.
         """
-        address = 46
+        address = CurrentDriverRegisters.PULSE_ENABLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseEnable")
+
+        return reply
+
     def read_pulse_duty_cycle_led0(self) -> int:
         """
         Reads the contents of the PulseDutyCycleLed0 register.
@@ -618,14 +666,15 @@ class CurrentDriver(Device):
         int
             Value read from the PulseDutyCycleLed0 register.
         """
-        address = 47
+        address = CurrentDriverRegisters.PULSE_DUTY_CYCLE_LED0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseDutyCycleLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDutyCycleLed0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_duty_cycle_led0(self, value: int):
+    def write_pulse_duty_cycle_led0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDutyCycleLed0 register.
 
@@ -634,10 +683,13 @@ class CurrentDriver(Device):
         value : int
             Value to write to the PulseDutyCycleLed0 register.
         """
-        address = 47
+        address = CurrentDriverRegisters.PULSE_DUTY_CYCLE_LED0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDutyCycleLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDutyCycleLed0")
+
+        return reply
+
     def read_pulse_duty_cycle_led1(self) -> int:
         """
         Reads the contents of the PulseDutyCycleLed1 register.
@@ -647,14 +699,15 @@ class CurrentDriver(Device):
         int
             Value read from the PulseDutyCycleLed1 register.
         """
-        address = 48
+        address = CurrentDriverRegisters.PULSE_DUTY_CYCLE_LED1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseDutyCycleLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDutyCycleLed1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_duty_cycle_led1(self, value: int):
+    def write_pulse_duty_cycle_led1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDutyCycleLed1 register.
 
@@ -663,10 +716,13 @@ class CurrentDriver(Device):
         value : int
             Value to write to the PulseDutyCycleLed1 register.
         """
-        address = 48
+        address = CurrentDriverRegisters.PULSE_DUTY_CYCLE_LED1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDutyCycleLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDutyCycleLed1")
+
+        return reply
+
     def read_pulse_frequency_led0(self) -> int:
         """
         Reads the contents of the PulseFrequencyLed0 register.
@@ -676,14 +732,15 @@ class CurrentDriver(Device):
         int
             Value read from the PulseFrequencyLed0 register.
         """
-        address = 49
+        address = CurrentDriverRegisters.PULSE_FREQUENCY_LED0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseFrequencyLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseFrequencyLed0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_frequency_led0(self, value: int):
+    def write_pulse_frequency_led0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseFrequencyLed0 register.
 
@@ -692,10 +749,13 @@ class CurrentDriver(Device):
         value : int
             Value to write to the PulseFrequencyLed0 register.
         """
-        address = 49
+        address = CurrentDriverRegisters.PULSE_FREQUENCY_LED0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseFrequencyLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseFrequencyLed0")
+
+        return reply
+
     def read_pulse_frequency_led1(self) -> int:
         """
         Reads the contents of the PulseFrequencyLed1 register.
@@ -705,14 +765,15 @@ class CurrentDriver(Device):
         int
             Value read from the PulseFrequencyLed1 register.
         """
-        address = 50
+        address = CurrentDriverRegisters.PULSE_FREQUENCY_LED1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PulseFrequencyLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseFrequencyLed1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_frequency_led1(self, value: int):
+    def write_pulse_frequency_led1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseFrequencyLed1 register.
 
@@ -721,10 +782,13 @@ class CurrentDriver(Device):
         value : int
             Value to write to the PulseFrequencyLed1 register.
         """
-        address = 50
+        address = CurrentDriverRegisters.PULSE_FREQUENCY_LED1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseFrequencyLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseFrequencyLed1")
+
+        return reply
+
     def read_ramp_led0(self) -> int:
         """
         Reads the contents of the RampLed0 register.
@@ -734,14 +798,15 @@ class CurrentDriver(Device):
         int
             Value read from the RampLed0 register.
         """
-        address = 51
+        address = CurrentDriverRegisters.RAMP_LED0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("RampLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("RampLed0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_ramp_led0(self, value: int):
+    def write_ramp_led0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the RampLed0 register.
 
@@ -750,10 +815,13 @@ class CurrentDriver(Device):
         value : int
             Value to write to the RampLed0 register.
         """
-        address = 51
+        address = CurrentDriverRegisters.RAMP_LED0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("RampLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("RampLed0")
+
+        return reply
+
     def read_ramp_led1(self) -> int:
         """
         Reads the contents of the RampLed1 register.
@@ -763,14 +831,15 @@ class CurrentDriver(Device):
         int
             Value read from the RampLed1 register.
         """
-        address = 52
+        address = CurrentDriverRegisters.RAMP_LED1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("RampLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("RampLed1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_ramp_led1(self, value: int):
+    def write_ramp_led1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the RampLed1 register.
 
@@ -779,10 +848,13 @@ class CurrentDriver(Device):
         value : int
             Value to write to the RampLed1 register.
         """
-        address = 52
+        address = CurrentDriverRegisters.RAMP_LED1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("RampLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("RampLed1")
+
+        return reply
+
     def read_ramp_config(self) -> LedRamps:
         """
         Reads the contents of the RampConfig register.
@@ -792,14 +864,14 @@ class CurrentDriver(Device):
         LedRamps
             Value read from the RampConfig register.
         """
-        address = 53
+        address = CurrentDriverRegisters.RAMP_CONFIG
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("RampConfig", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("RampConfig")
 
-        return reply.payload
+        return LedRamps(reply.payload)
 
-    def write_ramp_config(self, value: LedRamps):
+    def write_ramp_config(self, value: LedRamps) -> ReplyHarpMessage | None:
         """
         Writes a value to the RampConfig register.
 
@@ -808,10 +880,13 @@ class CurrentDriver(Device):
         value : LedRamps
             Value to write to the RampConfig register.
         """
-        address = 53
+        address = CurrentDriverRegisters.RAMP_CONFIG
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("RampConfig", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("RampConfig")
+
+        return reply
+
     def read_enable_events(self) -> CurrentDriverEvents:
         """
         Reads the contents of the EnableEvents register.
@@ -821,14 +896,14 @@ class CurrentDriver(Device):
         CurrentDriverEvents
             Value read from the EnableEvents register.
         """
-        address = 58
+        address = CurrentDriverRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableEvents")
 
-        return reply.payload
+        return CurrentDriverEvents(reply.payload)
 
-    def write_enable_events(self, value: CurrentDriverEvents):
+    def write_enable_events(self, value: CurrentDriverEvents) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -837,7 +912,10 @@ class CurrentDriver(Device):
         value : CurrentDriverEvents
             Value to write to the EnableEvents register.
         """
-        address = 58
+        address = CurrentDriverRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableEvents")
+
+        return reply
+

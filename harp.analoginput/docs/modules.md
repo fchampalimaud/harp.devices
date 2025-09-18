@@ -1,1 +1,1 @@
-::: harp.devices.analoginput.harpdevice
+::: harp.devices.analoginput

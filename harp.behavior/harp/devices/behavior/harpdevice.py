@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 @dataclass
 class AnalogDataPayload:
@@ -248,7 +247,7 @@ class FrameAcquired(IntFlag):
     FRAME_ACQUIRED = 0x1
 
 
-class MimicOutput(Enum):
+class MimicOutput(IntEnum):
     """
     Specifies the target IO on which to mimic the specified register.
 
@@ -282,7 +281,7 @@ class MimicOutput(Enum):
     DO3 = 7
 
 
-class EncoderModeConfig(Enum):
+class EncoderModeConfig(IntEnum):
     """
     Specifies the type of reading made from the quadrature encoder.
 
@@ -298,7 +297,7 @@ class EncoderModeConfig(Enum):
     DISPLACEMENT = 1
 
 
-class BehaviorRegisters(Enum):
+class BehaviorRegisters(IntEnum):
     """Enum for all available registers in the Behavior device.
 
     Attributes
@@ -440,6 +439,7 @@ class BehaviorRegisters(Enum):
     POKE_INPUT_FILTER : int
         Specifies the low pass filter time value for poke inputs, in ms.
     """
+
     DIGITAL_INPUT_STATE = 32
     OUTPUT_SET = 34
     OUTPUT_CLEAR = 35
@@ -533,12 +533,12 @@ class Behavior(Device):
         DigitalInputs
             Value read from the DigitalInputState register.
         """
-        address = 32
+        address = BehaviorRegisters.DIGITAL_INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_output_set(self) -> DigitalOutputs:
         """
@@ -549,14 +549,14 @@ class Behavior(Device):
         DigitalOutputs
             Value read from the OutputSet register.
         """
-        address = 34
+        address = BehaviorRegisters.OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputSet")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_set(self, value: DigitalOutputs):
+    def write_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputSet register.
 
@@ -565,10 +565,13 @@ class Behavior(Device):
         value : DigitalOutputs
             Value to write to the OutputSet register.
         """
-        address = 34
+        address = BehaviorRegisters.OUTPUT_SET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputSet")
+
+        return reply
+
     def read_output_clear(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputClear register.
@@ -578,14 +581,14 @@ class Behavior(Device):
         DigitalOutputs
             Value read from the OutputClear register.
         """
-        address = 35
+        address = BehaviorRegisters.OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputClear")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_clear(self, value: DigitalOutputs):
+    def write_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputClear register.
 
@@ -594,10 +597,13 @@ class Behavior(Device):
         value : DigitalOutputs
             Value to write to the OutputClear register.
         """
-        address = 35
+        address = BehaviorRegisters.OUTPUT_CLEAR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputClear")
+
+        return reply
+
     def read_output_toggle(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputToggle register.
@@ -607,14 +613,14 @@ class Behavior(Device):
         DigitalOutputs
             Value read from the OutputToggle register.
         """
-        address = 36
+        address = BehaviorRegisters.OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputToggle")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_toggle(self, value: DigitalOutputs):
+    def write_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputToggle register.
 
@@ -623,10 +629,13 @@ class Behavior(Device):
         value : DigitalOutputs
             Value to write to the OutputToggle register.
         """
-        address = 36
+        address = BehaviorRegisters.OUTPUT_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputToggle")
+
+        return reply
+
     def read_output_state(self) -> DigitalOutputs:
         """
         Reads the contents of the OutputState register.
@@ -636,14 +645,14 @@ class Behavior(Device):
         DigitalOutputs
             Value read from the OutputState register.
         """
-        address = 37
+        address = BehaviorRegisters.OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputState")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_state(self, value: DigitalOutputs):
+    def write_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputState register.
 
@@ -652,10 +661,13 @@ class Behavior(Device):
         value : DigitalOutputs
             Value to write to the OutputState register.
         """
-        address = 37
+        address = BehaviorRegisters.OUTPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputState")
+
+        return reply
+
     def read_port_dio_set(self) -> PortDigitalIOS:
         """
         Reads the contents of the PortDIOSet register.
@@ -665,14 +677,14 @@ class Behavior(Device):
         PortDigitalIOS
             Value read from the PortDIOSet register.
         """
-        address = 38
+        address = BehaviorRegisters.PORT_DIO_SET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PortDIOSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PortDIOSet")
 
-        return reply.payload
+        return PortDigitalIOS(reply.payload)
 
-    def write_port_dio_set(self, value: PortDigitalIOS):
+    def write_port_dio_set(self, value: PortDigitalIOS) -> ReplyHarpMessage | None:
         """
         Writes a value to the PortDIOSet register.
 
@@ -681,10 +693,13 @@ class Behavior(Device):
         value : PortDigitalIOS
             Value to write to the PortDIOSet register.
         """
-        address = 38
+        address = BehaviorRegisters.PORT_DIO_SET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PortDIOSet", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PortDIOSet")
+
+        return reply
+
     def read_port_dio_clear(self) -> PortDigitalIOS:
         """
         Reads the contents of the PortDIOClear register.
@@ -694,14 +709,14 @@ class Behavior(Device):
         PortDigitalIOS
             Value read from the PortDIOClear register.
         """
-        address = 39
+        address = BehaviorRegisters.PORT_DIO_CLEAR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PortDIOClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PortDIOClear")
 
-        return reply.payload
+        return PortDigitalIOS(reply.payload)
 
-    def write_port_dio_clear(self, value: PortDigitalIOS):
+    def write_port_dio_clear(self, value: PortDigitalIOS) -> ReplyHarpMessage | None:
         """
         Writes a value to the PortDIOClear register.
 
@@ -710,10 +725,13 @@ class Behavior(Device):
         value : PortDigitalIOS
             Value to write to the PortDIOClear register.
         """
-        address = 39
+        address = BehaviorRegisters.PORT_DIO_CLEAR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PortDIOClear", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PortDIOClear")
+
+        return reply
+
     def read_port_dio_toggle(self) -> PortDigitalIOS:
         """
         Reads the contents of the PortDIOToggle register.
@@ -723,14 +741,14 @@ class Behavior(Device):
         PortDigitalIOS
             Value read from the PortDIOToggle register.
         """
-        address = 40
+        address = BehaviorRegisters.PORT_DIO_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PortDIOToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PortDIOToggle")
 
-        return reply.payload
+        return PortDigitalIOS(reply.payload)
 
-    def write_port_dio_toggle(self, value: PortDigitalIOS):
+    def write_port_dio_toggle(self, value: PortDigitalIOS) -> ReplyHarpMessage | None:
         """
         Writes a value to the PortDIOToggle register.
 
@@ -739,10 +757,13 @@ class Behavior(Device):
         value : PortDigitalIOS
             Value to write to the PortDIOToggle register.
         """
-        address = 40
+        address = BehaviorRegisters.PORT_DIO_TOGGLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PortDIOToggle", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PortDIOToggle")
+
+        return reply
+
     def read_port_dio_state(self) -> PortDigitalIOS:
         """
         Reads the contents of the PortDIOState register.
@@ -752,14 +773,14 @@ class Behavior(Device):
         PortDigitalIOS
             Value read from the PortDIOState register.
         """
-        address = 41
+        address = BehaviorRegisters.PORT_DIO_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PortDIOState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PortDIOState")
 
-        return reply.payload
+        return PortDigitalIOS(reply.payload)
 
-    def write_port_dio_state(self, value: PortDigitalIOS):
+    def write_port_dio_state(self, value: PortDigitalIOS) -> ReplyHarpMessage | None:
         """
         Writes a value to the PortDIOState register.
 
@@ -768,10 +789,13 @@ class Behavior(Device):
         value : PortDigitalIOS
             Value to write to the PortDIOState register.
         """
-        address = 41
+        address = BehaviorRegisters.PORT_DIO_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PortDIOState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PortDIOState")
+
+        return reply
+
     def read_port_dio_direction(self) -> PortDigitalIOS:
         """
         Reads the contents of the PortDIODirection register.
@@ -781,14 +805,14 @@ class Behavior(Device):
         PortDigitalIOS
             Value read from the PortDIODirection register.
         """
-        address = 42
+        address = BehaviorRegisters.PORT_DIO_DIRECTION
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PortDIODirection", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PortDIODirection")
 
-        return reply.payload
+        return PortDigitalIOS(reply.payload)
 
-    def write_port_dio_direction(self, value: PortDigitalIOS):
+    def write_port_dio_direction(self, value: PortDigitalIOS) -> ReplyHarpMessage | None:
         """
         Writes a value to the PortDIODirection register.
 
@@ -797,10 +821,13 @@ class Behavior(Device):
         value : PortDigitalIOS
             Value to write to the PortDIODirection register.
         """
-        address = 42
+        address = BehaviorRegisters.PORT_DIO_DIRECTION
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PortDIODirection", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PortDIODirection")
+
+        return reply
+
     def read_port_dio_state_event(self) -> PortDigitalIOS:
         """
         Reads the contents of the PortDIOStateEvent register.
@@ -810,12 +837,12 @@ class Behavior(Device):
         PortDigitalIOS
             Value read from the PortDIOStateEvent register.
         """
-        address = 43
+        address = BehaviorRegisters.PORT_DIO_STATE_EVENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PortDIOStateEvent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PortDIOStateEvent")
 
-        return reply.payload
+        return PortDigitalIOS(reply.payload)
 
     def read_analog_data(self) -> AnalogDataPayload:
         """
@@ -826,12 +853,18 @@ class Behavior(Device):
         AnalogDataPayload
             Value read from the AnalogData register.
         """
-        address = 44
+        address = BehaviorRegisters.ANALOG_DATA
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.S16))
-        if reply.is_error:
-            raise HarpReadException("AnalogData", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("AnalogData")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return AnalogDataPayload(
+            AnalogInput0=payload[0],
+            Encoder=payload[1],
+            AnalogInput1=payload[2]
+        )
 
     def read_output_pulse_enable(self) -> DigitalOutputs:
         """
@@ -842,14 +875,14 @@ class Behavior(Device):
         DigitalOutputs
             Value read from the OutputPulseEnable register.
         """
-        address = 45
+        address = BehaviorRegisters.OUTPUT_PULSE_ENABLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("OutputPulseEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("OutputPulseEnable")
 
-        return reply.payload
+        return DigitalOutputs(reply.payload)
 
-    def write_output_pulse_enable(self, value: DigitalOutputs):
+    def write_output_pulse_enable(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the OutputPulseEnable register.
 
@@ -858,10 +891,13 @@ class Behavior(Device):
         value : DigitalOutputs
             Value to write to the OutputPulseEnable register.
         """
-        address = 45
+        address = BehaviorRegisters.OUTPUT_PULSE_ENABLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("OutputPulseEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("OutputPulseEnable")
+
+        return reply
+
     def read_pulse_do_port0(self) -> int:
         """
         Reads the contents of the PulseDOPort0 register.
@@ -871,14 +907,15 @@ class Behavior(Device):
         int
             Value read from the PulseDOPort0 register.
         """
-        address = 46
+        address = BehaviorRegisters.PULSE_DO_PORT0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDOPort0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDOPort0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do_port0(self, value: int):
+    def write_pulse_do_port0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDOPort0 register.
 
@@ -887,10 +924,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDOPort0 register.
         """
-        address = 46
+        address = BehaviorRegisters.PULSE_DO_PORT0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDOPort0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDOPort0")
+
+        return reply
+
     def read_pulse_do_port1(self) -> int:
         """
         Reads the contents of the PulseDOPort1 register.
@@ -900,14 +940,15 @@ class Behavior(Device):
         int
             Value read from the PulseDOPort1 register.
         """
-        address = 47
+        address = BehaviorRegisters.PULSE_DO_PORT1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDOPort1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDOPort1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do_port1(self, value: int):
+    def write_pulse_do_port1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDOPort1 register.
 
@@ -916,10 +957,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDOPort1 register.
         """
-        address = 47
+        address = BehaviorRegisters.PULSE_DO_PORT1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDOPort1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDOPort1")
+
+        return reply
+
     def read_pulse_do_port2(self) -> int:
         """
         Reads the contents of the PulseDOPort2 register.
@@ -929,14 +973,15 @@ class Behavior(Device):
         int
             Value read from the PulseDOPort2 register.
         """
-        address = 48
+        address = BehaviorRegisters.PULSE_DO_PORT2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDOPort2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDOPort2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do_port2(self, value: int):
+    def write_pulse_do_port2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDOPort2 register.
 
@@ -945,10 +990,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDOPort2 register.
         """
-        address = 48
+        address = BehaviorRegisters.PULSE_DO_PORT2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDOPort2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDOPort2")
+
+        return reply
+
     def read_pulse_supply_port0(self) -> int:
         """
         Reads the contents of the PulseSupplyPort0 register.
@@ -958,14 +1006,15 @@ class Behavior(Device):
         int
             Value read from the PulseSupplyPort0 register.
         """
-        address = 49
+        address = BehaviorRegisters.PULSE_SUPPLY_PORT0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseSupplyPort0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseSupplyPort0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_supply_port0(self, value: int):
+    def write_pulse_supply_port0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseSupplyPort0 register.
 
@@ -974,10 +1023,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseSupplyPort0 register.
         """
-        address = 49
+        address = BehaviorRegisters.PULSE_SUPPLY_PORT0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseSupplyPort0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseSupplyPort0")
+
+        return reply
+
     def read_pulse_supply_port1(self) -> int:
         """
         Reads the contents of the PulseSupplyPort1 register.
@@ -987,14 +1039,15 @@ class Behavior(Device):
         int
             Value read from the PulseSupplyPort1 register.
         """
-        address = 50
+        address = BehaviorRegisters.PULSE_SUPPLY_PORT1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseSupplyPort1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseSupplyPort1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_supply_port1(self, value: int):
+    def write_pulse_supply_port1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseSupplyPort1 register.
 
@@ -1003,10 +1056,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseSupplyPort1 register.
         """
-        address = 50
+        address = BehaviorRegisters.PULSE_SUPPLY_PORT1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseSupplyPort1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseSupplyPort1")
+
+        return reply
+
     def read_pulse_supply_port2(self) -> int:
         """
         Reads the contents of the PulseSupplyPort2 register.
@@ -1016,14 +1072,15 @@ class Behavior(Device):
         int
             Value read from the PulseSupplyPort2 register.
         """
-        address = 51
+        address = BehaviorRegisters.PULSE_SUPPLY_PORT2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseSupplyPort2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseSupplyPort2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_supply_port2(self, value: int):
+    def write_pulse_supply_port2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseSupplyPort2 register.
 
@@ -1032,10 +1089,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseSupplyPort2 register.
         """
-        address = 51
+        address = BehaviorRegisters.PULSE_SUPPLY_PORT2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseSupplyPort2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseSupplyPort2")
+
+        return reply
+
     def read_pulse_led0(self) -> int:
         """
         Reads the contents of the PulseLed0 register.
@@ -1045,14 +1105,15 @@ class Behavior(Device):
         int
             Value read from the PulseLed0 register.
         """
-        address = 52
+        address = BehaviorRegisters.PULSE_LED0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseLed0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_led0(self, value: int):
+    def write_pulse_led0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseLed0 register.
 
@@ -1061,10 +1122,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseLed0 register.
         """
-        address = 52
+        address = BehaviorRegisters.PULSE_LED0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseLed0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseLed0")
+
+        return reply
+
     def read_pulse_led1(self) -> int:
         """
         Reads the contents of the PulseLed1 register.
@@ -1074,14 +1138,15 @@ class Behavior(Device):
         int
             Value read from the PulseLed1 register.
         """
-        address = 53
+        address = BehaviorRegisters.PULSE_LED1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseLed1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_led1(self, value: int):
+    def write_pulse_led1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseLed1 register.
 
@@ -1090,10 +1155,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseLed1 register.
         """
-        address = 53
+        address = BehaviorRegisters.PULSE_LED1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseLed1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseLed1")
+
+        return reply
+
     def read_pulse_rgb0(self) -> int:
         """
         Reads the contents of the PulseRgb0 register.
@@ -1103,14 +1171,15 @@ class Behavior(Device):
         int
             Value read from the PulseRgb0 register.
         """
-        address = 54
+        address = BehaviorRegisters.PULSE_RGB0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseRgb0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseRgb0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_rgb0(self, value: int):
+    def write_pulse_rgb0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseRgb0 register.
 
@@ -1119,10 +1188,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseRgb0 register.
         """
-        address = 54
+        address = BehaviorRegisters.PULSE_RGB0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseRgb0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseRgb0")
+
+        return reply
+
     def read_pulse_rgb1(self) -> int:
         """
         Reads the contents of the PulseRgb1 register.
@@ -1132,14 +1204,15 @@ class Behavior(Device):
         int
             Value read from the PulseRgb1 register.
         """
-        address = 55
+        address = BehaviorRegisters.PULSE_RGB1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseRgb1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseRgb1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_rgb1(self, value: int):
+    def write_pulse_rgb1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseRgb1 register.
 
@@ -1148,10 +1221,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseRgb1 register.
         """
-        address = 55
+        address = BehaviorRegisters.PULSE_RGB1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseRgb1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseRgb1")
+
+        return reply
+
     def read_pulse_do0(self) -> int:
         """
         Reads the contents of the PulseDO0 register.
@@ -1161,14 +1237,15 @@ class Behavior(Device):
         int
             Value read from the PulseDO0 register.
         """
-        address = 56
+        address = BehaviorRegisters.PULSE_DO0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do0(self, value: int):
+    def write_pulse_do0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO0 register.
 
@@ -1177,10 +1254,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDO0 register.
         """
-        address = 56
+        address = BehaviorRegisters.PULSE_DO0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO0")
+
+        return reply
+
     def read_pulse_do1(self) -> int:
         """
         Reads the contents of the PulseDO1 register.
@@ -1190,14 +1270,15 @@ class Behavior(Device):
         int
             Value read from the PulseDO1 register.
         """
-        address = 57
+        address = BehaviorRegisters.PULSE_DO1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do1(self, value: int):
+    def write_pulse_do1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO1 register.
 
@@ -1206,10 +1287,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDO1 register.
         """
-        address = 57
+        address = BehaviorRegisters.PULSE_DO1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO1")
+
+        return reply
+
     def read_pulse_do2(self) -> int:
         """
         Reads the contents of the PulseDO2 register.
@@ -1219,14 +1303,15 @@ class Behavior(Device):
         int
             Value read from the PulseDO2 register.
         """
-        address = 58
+        address = BehaviorRegisters.PULSE_DO2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do2(self, value: int):
+    def write_pulse_do2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO2 register.
 
@@ -1235,10 +1320,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDO2 register.
         """
-        address = 58
+        address = BehaviorRegisters.PULSE_DO2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO2")
+
+        return reply
+
     def read_pulse_do3(self) -> int:
         """
         Reads the contents of the PulseDO3 register.
@@ -1248,14 +1336,15 @@ class Behavior(Device):
         int
             Value read from the PulseDO3 register.
         """
-        address = 59
+        address = BehaviorRegisters.PULSE_DO3
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PulseDO3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PulseDO3")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pulse_do3(self, value: int):
+    def write_pulse_do3(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PulseDO3 register.
 
@@ -1264,10 +1353,13 @@ class Behavior(Device):
         value : int
             Value to write to the PulseDO3 register.
         """
-        address = 59
+        address = BehaviorRegisters.PULSE_DO3
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PulseDO3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PulseDO3")
+
+        return reply
+
     def read_pwm_frequency_do0(self) -> int:
         """
         Reads the contents of the PwmFrequencyDO0 register.
@@ -1277,14 +1369,15 @@ class Behavior(Device):
         int
             Value read from the PwmFrequencyDO0 register.
         """
-        address = 60
+        address = BehaviorRegisters.PWM_FREQUENCY_DO0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PwmFrequencyDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmFrequencyDO0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_frequency_do0(self, value: int):
+    def write_pwm_frequency_do0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmFrequencyDO0 register.
 
@@ -1293,10 +1386,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmFrequencyDO0 register.
         """
-        address = 60
+        address = BehaviorRegisters.PWM_FREQUENCY_DO0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmFrequencyDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmFrequencyDO0")
+
+        return reply
+
     def read_pwm_frequency_do1(self) -> int:
         """
         Reads the contents of the PwmFrequencyDO1 register.
@@ -1306,14 +1402,15 @@ class Behavior(Device):
         int
             Value read from the PwmFrequencyDO1 register.
         """
-        address = 61
+        address = BehaviorRegisters.PWM_FREQUENCY_DO1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PwmFrequencyDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmFrequencyDO1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_frequency_do1(self, value: int):
+    def write_pwm_frequency_do1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmFrequencyDO1 register.
 
@@ -1322,10 +1419,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmFrequencyDO1 register.
         """
-        address = 61
+        address = BehaviorRegisters.PWM_FREQUENCY_DO1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmFrequencyDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmFrequencyDO1")
+
+        return reply
+
     def read_pwm_frequency_do2(self) -> int:
         """
         Reads the contents of the PwmFrequencyDO2 register.
@@ -1335,14 +1435,15 @@ class Behavior(Device):
         int
             Value read from the PwmFrequencyDO2 register.
         """
-        address = 62
+        address = BehaviorRegisters.PWM_FREQUENCY_DO2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PwmFrequencyDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmFrequencyDO2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_frequency_do2(self, value: int):
+    def write_pwm_frequency_do2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmFrequencyDO2 register.
 
@@ -1351,10 +1452,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmFrequencyDO2 register.
         """
-        address = 62
+        address = BehaviorRegisters.PWM_FREQUENCY_DO2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmFrequencyDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmFrequencyDO2")
+
+        return reply
+
     def read_pwm_frequency_do3(self) -> int:
         """
         Reads the contents of the PwmFrequencyDO3 register.
@@ -1364,14 +1468,15 @@ class Behavior(Device):
         int
             Value read from the PwmFrequencyDO3 register.
         """
-        address = 63
+        address = BehaviorRegisters.PWM_FREQUENCY_DO3
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("PwmFrequencyDO3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmFrequencyDO3")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_frequency_do3(self, value: int):
+    def write_pwm_frequency_do3(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmFrequencyDO3 register.
 
@@ -1380,10 +1485,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmFrequencyDO3 register.
         """
-        address = 63
+        address = BehaviorRegisters.PWM_FREQUENCY_DO3
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmFrequencyDO3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmFrequencyDO3")
+
+        return reply
+
     def read_pwm_duty_cycle_do0(self) -> int:
         """
         Reads the contents of the PwmDutyCycleDO0 register.
@@ -1393,14 +1501,15 @@ class Behavior(Device):
         int
             Value read from the PwmDutyCycleDO0 register.
         """
-        address = 64
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PwmDutyCycleDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmDutyCycleDO0")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_duty_cycle_do0(self, value: int):
+    def write_pwm_duty_cycle_do0(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmDutyCycleDO0 register.
 
@@ -1409,10 +1518,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmDutyCycleDO0 register.
         """
-        address = 64
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmDutyCycleDO0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmDutyCycleDO0")
+
+        return reply
+
     def read_pwm_duty_cycle_do1(self) -> int:
         """
         Reads the contents of the PwmDutyCycleDO1 register.
@@ -1422,14 +1534,15 @@ class Behavior(Device):
         int
             Value read from the PwmDutyCycleDO1 register.
         """
-        address = 65
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PwmDutyCycleDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmDutyCycleDO1")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_duty_cycle_do1(self, value: int):
+    def write_pwm_duty_cycle_do1(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmDutyCycleDO1 register.
 
@@ -1438,10 +1551,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmDutyCycleDO1 register.
         """
-        address = 65
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmDutyCycleDO1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmDutyCycleDO1")
+
+        return reply
+
     def read_pwm_duty_cycle_do2(self) -> int:
         """
         Reads the contents of the PwmDutyCycleDO2 register.
@@ -1451,14 +1567,15 @@ class Behavior(Device):
         int
             Value read from the PwmDutyCycleDO2 register.
         """
-        address = 66
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO2
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PwmDutyCycleDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmDutyCycleDO2")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_duty_cycle_do2(self, value: int):
+    def write_pwm_duty_cycle_do2(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmDutyCycleDO2 register.
 
@@ -1467,10 +1584,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmDutyCycleDO2 register.
         """
-        address = 66
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO2
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmDutyCycleDO2", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmDutyCycleDO2")
+
+        return reply
+
     def read_pwm_duty_cycle_do3(self) -> int:
         """
         Reads the contents of the PwmDutyCycleDO3 register.
@@ -1480,14 +1600,15 @@ class Behavior(Device):
         int
             Value read from the PwmDutyCycleDO3 register.
         """
-        address = 67
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO3
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PwmDutyCycleDO3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmDutyCycleDO3")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_pwm_duty_cycle_do3(self, value: int):
+    def write_pwm_duty_cycle_do3(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmDutyCycleDO3 register.
 
@@ -1496,10 +1617,13 @@ class Behavior(Device):
         value : int
             Value to write to the PwmDutyCycleDO3 register.
         """
-        address = 67
+        address = BehaviorRegisters.PWM_DUTY_CYCLE_DO3
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmDutyCycleDO3", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmDutyCycleDO3")
+
+        return reply
+
     def read_pwm_start(self) -> PwmOutputs:
         """
         Reads the contents of the PwmStart register.
@@ -1509,14 +1633,14 @@ class Behavior(Device):
         PwmOutputs
             Value read from the PwmStart register.
         """
-        address = 68
+        address = BehaviorRegisters.PWM_START
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PwmStart", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmStart")
 
-        return reply.payload
+        return PwmOutputs(reply.payload)
 
-    def write_pwm_start(self, value: PwmOutputs):
+    def write_pwm_start(self, value: PwmOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmStart register.
 
@@ -1525,10 +1649,13 @@ class Behavior(Device):
         value : PwmOutputs
             Value to write to the PwmStart register.
         """
-        address = 68
+        address = BehaviorRegisters.PWM_START
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmStart", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmStart")
+
+        return reply
+
     def read_pwm_stop(self) -> PwmOutputs:
         """
         Reads the contents of the PwmStop register.
@@ -1538,14 +1665,14 @@ class Behavior(Device):
         PwmOutputs
             Value read from the PwmStop register.
         """
-        address = 69
+        address = BehaviorRegisters.PWM_STOP
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PwmStop", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PwmStop")
 
-        return reply.payload
+        return PwmOutputs(reply.payload)
 
-    def write_pwm_stop(self, value: PwmOutputs):
+    def write_pwm_stop(self, value: PwmOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the PwmStop register.
 
@@ -1554,10 +1681,13 @@ class Behavior(Device):
         value : PwmOutputs
             Value to write to the PwmStop register.
         """
-        address = 69
+        address = BehaviorRegisters.PWM_STOP
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PwmStop", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PwmStop")
+
+        return reply
+
     def read_rgb_all(self) -> RgbAllPayload:
         """
         Reads the contents of the RgbAll register.
@@ -1567,14 +1697,23 @@ class Behavior(Device):
         RgbAllPayload
             Value read from the RgbAll register.
         """
-        address = 70
+        address = BehaviorRegisters.RGB_ALL
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("RgbAll", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("RgbAll")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return RgbAllPayload(
+            Green0=payload[0],
+            Red0=payload[1],
+            Blue0=payload[2],
+            Green1=payload[3],
+            Red1=payload[4],
+            Blue1=payload[5]
+        )
 
-    def write_rgb_all(self, value: RgbAllPayload):
+    def write_rgb_all(self, value: RgbAllPayload) -> ReplyHarpMessage | None:
         """
         Writes a value to the RgbAll register.
 
@@ -1583,10 +1722,13 @@ class Behavior(Device):
         value : RgbAllPayload
             Value to write to the RgbAll register.
         """
-        address = 70
+        address = BehaviorRegisters.RGB_ALL
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("RgbAll", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("RgbAll")
+
+        return reply
+
     def read_rgb0(self) -> RgbPayload:
         """
         Reads the contents of the Rgb0 register.
@@ -1596,14 +1738,20 @@ class Behavior(Device):
         RgbPayload
             Value read from the Rgb0 register.
         """
-        address = 71
+        address = BehaviorRegisters.RGB0
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Rgb0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Rgb0")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return RgbPayload(
+            Green=payload[0],
+            Red=payload[1],
+            Blue=payload[2]
+        )
 
-    def write_rgb0(self, value: RgbPayload):
+    def write_rgb0(self, value: RgbPayload) -> ReplyHarpMessage | None:
         """
         Writes a value to the Rgb0 register.
 
@@ -1612,10 +1760,13 @@ class Behavior(Device):
         value : RgbPayload
             Value to write to the Rgb0 register.
         """
-        address = 71
+        address = BehaviorRegisters.RGB0
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Rgb0", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Rgb0")
+
+        return reply
+
     def read_rgb1(self) -> RgbPayload:
         """
         Reads the contents of the Rgb1 register.
@@ -1625,14 +1776,20 @@ class Behavior(Device):
         RgbPayload
             Value read from the Rgb1 register.
         """
-        address = 72
+        address = BehaviorRegisters.RGB1
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Rgb1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Rgb1")
 
-        return reply.payload
+        # Map payload (list/array) to dataclass fields by offset
+        payload = reply.payload
+        return RgbPayload(
+            Green=payload[0],
+            Red=payload[1],
+            Blue=payload[2]
+        )
 
-    def write_rgb1(self, value: RgbPayload):
+    def write_rgb1(self, value: RgbPayload) -> ReplyHarpMessage | None:
         """
         Writes a value to the Rgb1 register.
 
@@ -1641,10 +1798,13 @@ class Behavior(Device):
         value : RgbPayload
             Value to write to the Rgb1 register.
         """
-        address = 72
+        address = BehaviorRegisters.RGB1
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Rgb1", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Rgb1")
+
+        return reply
+
     def read_led0_current(self) -> int:
         """
         Reads the contents of the Led0Current register.
@@ -1654,14 +1814,15 @@ class Behavior(Device):
         int
             Value read from the Led0Current register.
         """
-        address = 73
+        address = BehaviorRegisters.LED0_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Led0Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0Current")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_current(self, value: int):
+    def write_led0_current(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0Current register.
 
@@ -1670,10 +1831,13 @@ class Behavior(Device):
         value : int
             Value to write to the Led0Current register.
         """
-        address = 73
+        address = BehaviorRegisters.LED0_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0Current")
+
+        return reply
+
     def read_led1_current(self) -> int:
         """
         Reads the contents of the Led1Current register.
@@ -1683,14 +1847,15 @@ class Behavior(Device):
         int
             Value read from the Led1Current register.
         """
-        address = 74
+        address = BehaviorRegisters.LED1_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Led1Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1Current")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_current(self, value: int):
+    def write_led1_current(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1Current register.
 
@@ -1699,10 +1864,13 @@ class Behavior(Device):
         value : int
             Value to write to the Led1Current register.
         """
-        address = 74
+        address = BehaviorRegisters.LED1_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1Current", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1Current")
+
+        return reply
+
     def read_led0_max_current(self) -> int:
         """
         Reads the contents of the Led0MaxCurrent register.
@@ -1712,14 +1880,15 @@ class Behavior(Device):
         int
             Value read from the Led0MaxCurrent register.
         """
-        address = 75
+        address = BehaviorRegisters.LED0_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Led0MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led0MaxCurrent")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led0_max_current(self, value: int):
+    def write_led0_max_current(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led0MaxCurrent register.
 
@@ -1728,10 +1897,13 @@ class Behavior(Device):
         value : int
             Value to write to the Led0MaxCurrent register.
         """
-        address = 75
+        address = BehaviorRegisters.LED0_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Led0MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led0MaxCurrent")
+
+        return reply
+
     def read_led1_max_current(self) -> int:
         """
         Reads the contents of the Led1MaxCurrent register.
@@ -1741,14 +1913,15 @@ class Behavior(Device):
         int
             Value read from the Led1MaxCurrent register.
         """
-        address = 76
+        address = BehaviorRegisters.LED1_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Led1MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Led1MaxCurrent")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_led1_max_current(self, value: int):
+    def write_led1_max_current(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Led1MaxCurrent register.
 
@@ -1757,10 +1930,13 @@ class Behavior(Device):
         value : int
             Value to write to the Led1MaxCurrent register.
         """
-        address = 76
+        address = BehaviorRegisters.LED1_MAX_CURRENT
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("Led1MaxCurrent", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Led1MaxCurrent")
+
+        return reply
+
     def read_event_enable(self) -> Events:
         """
         Reads the contents of the EventEnable register.
@@ -1770,14 +1946,14 @@ class Behavior(Device):
         Events
             Value read from the EventEnable register.
         """
-        address = 77
+        address = BehaviorRegisters.EVENT_ENABLE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EventEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EventEnable")
 
-        return reply.payload
+        return Events(reply.payload)
 
-    def write_event_enable(self, value: Events):
+    def write_event_enable(self, value: Events) -> ReplyHarpMessage | None:
         """
         Writes a value to the EventEnable register.
 
@@ -1786,10 +1962,13 @@ class Behavior(Device):
         value : Events
             Value to write to the EventEnable register.
         """
-        address = 77
+        address = BehaviorRegisters.EVENT_ENABLE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EventEnable", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EventEnable")
+
+        return reply
+
     def read_start_cameras(self) -> CameraOutputs:
         """
         Reads the contents of the StartCameras register.
@@ -1799,14 +1978,14 @@ class Behavior(Device):
         CameraOutputs
             Value read from the StartCameras register.
         """
-        address = 78
+        address = BehaviorRegisters.START_CAMERAS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("StartCameras", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("StartCameras")
 
-        return reply.payload
+        return CameraOutputs(reply.payload)
 
-    def write_start_cameras(self, value: CameraOutputs):
+    def write_start_cameras(self, value: CameraOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the StartCameras register.
 
@@ -1815,10 +1994,13 @@ class Behavior(Device):
         value : CameraOutputs
             Value to write to the StartCameras register.
         """
-        address = 78
+        address = BehaviorRegisters.START_CAMERAS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("StartCameras", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("StartCameras")
+
+        return reply
+
     def read_stop_cameras(self) -> CameraOutputs:
         """
         Reads the contents of the StopCameras register.
@@ -1828,14 +2010,14 @@ class Behavior(Device):
         CameraOutputs
             Value read from the StopCameras register.
         """
-        address = 79
+        address = BehaviorRegisters.STOP_CAMERAS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("StopCameras", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("StopCameras")
 
-        return reply.payload
+        return CameraOutputs(reply.payload)
 
-    def write_stop_cameras(self, value: CameraOutputs):
+    def write_stop_cameras(self, value: CameraOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the StopCameras register.
 
@@ -1844,10 +2026,13 @@ class Behavior(Device):
         value : CameraOutputs
             Value to write to the StopCameras register.
         """
-        address = 79
+        address = BehaviorRegisters.STOP_CAMERAS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("StopCameras", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("StopCameras")
+
+        return reply
+
     def read_enable_servos(self) -> ServoOutputs:
         """
         Reads the contents of the EnableServos register.
@@ -1857,14 +2042,14 @@ class Behavior(Device):
         ServoOutputs
             Value read from the EnableServos register.
         """
-        address = 80
+        address = BehaviorRegisters.ENABLE_SERVOS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableServos", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableServos")
 
-        return reply.payload
+        return ServoOutputs(reply.payload)
 
-    def write_enable_servos(self, value: ServoOutputs):
+    def write_enable_servos(self, value: ServoOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableServos register.
 
@@ -1873,10 +2058,13 @@ class Behavior(Device):
         value : ServoOutputs
             Value to write to the EnableServos register.
         """
-        address = 80
+        address = BehaviorRegisters.ENABLE_SERVOS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableServos", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableServos")
+
+        return reply
+
     def read_disable_servos(self) -> ServoOutputs:
         """
         Reads the contents of the DisableServos register.
@@ -1886,14 +2074,14 @@ class Behavior(Device):
         ServoOutputs
             Value read from the DisableServos register.
         """
-        address = 81
+        address = BehaviorRegisters.DISABLE_SERVOS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DisableServos", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DisableServos")
 
-        return reply.payload
+        return ServoOutputs(reply.payload)
 
-    def write_disable_servos(self, value: ServoOutputs):
+    def write_disable_servos(self, value: ServoOutputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the DisableServos register.
 
@@ -1902,10 +2090,13 @@ class Behavior(Device):
         value : ServoOutputs
             Value to write to the DisableServos register.
         """
-        address = 81
+        address = BehaviorRegisters.DISABLE_SERVOS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DisableServos", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DisableServos")
+
+        return reply
+
     def read_enable_encoders(self) -> EncoderInputs:
         """
         Reads the contents of the EnableEncoders register.
@@ -1915,14 +2106,14 @@ class Behavior(Device):
         EncoderInputs
             Value read from the EnableEncoders register.
         """
-        address = 82
+        address = BehaviorRegisters.ENABLE_ENCODERS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableEncoders", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableEncoders")
 
-        return reply.payload
+        return EncoderInputs(reply.payload)
 
-    def write_enable_encoders(self, value: EncoderInputs):
+    def write_enable_encoders(self, value: EncoderInputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableEncoders register.
 
@@ -1931,10 +2122,13 @@ class Behavior(Device):
         value : EncoderInputs
             Value to write to the EnableEncoders register.
         """
-        address = 82
+        address = BehaviorRegisters.ENABLE_ENCODERS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableEncoders", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableEncoders")
+
+        return reply
+
     def read_encoder_mode(self) -> EncoderModeConfig:
         """
         Reads the contents of the EncoderMode register.
@@ -1944,14 +2138,14 @@ class Behavior(Device):
         EncoderModeConfig
             Value read from the EncoderMode register.
         """
-        address = 83
+        address = BehaviorRegisters.ENCODER_MODE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EncoderMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EncoderMode")
 
-        return reply.payload
+        return EncoderModeConfig(reply.payload)
 
-    def write_encoder_mode(self, value: EncoderModeConfig):
+    def write_encoder_mode(self, value: EncoderModeConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the EncoderMode register.
 
@@ -1960,10 +2154,13 @@ class Behavior(Device):
         value : EncoderModeConfig
             Value to write to the EncoderMode register.
         """
-        address = 83
+        address = BehaviorRegisters.ENCODER_MODE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EncoderMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EncoderMode")
+
+        return reply
+
     def read_camera0_frame(self) -> FrameAcquired:
         """
         Reads the contents of the Camera0Frame register.
@@ -1973,12 +2170,12 @@ class Behavior(Device):
         FrameAcquired
             Value read from the Camera0Frame register.
         """
-        address = 92
+        address = BehaviorRegisters.CAMERA0_FRAME
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Camera0Frame", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Camera0Frame")
 
-        return reply.payload
+        return FrameAcquired(reply.payload)
 
     def read_camera0_frequency(self) -> int:
         """
@@ -1989,14 +2186,15 @@ class Behavior(Device):
         int
             Value read from the Camera0Frequency register.
         """
-        address = 93
+        address = BehaviorRegisters.CAMERA0_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Camera0Frequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Camera0Frequency")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_camera0_frequency(self, value: int):
+    def write_camera0_frequency(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Camera0Frequency register.
 
@@ -2005,10 +2203,13 @@ class Behavior(Device):
         value : int
             Value to write to the Camera0Frequency register.
         """
-        address = 93
+        address = BehaviorRegisters.CAMERA0_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Camera0Frequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Camera0Frequency")
+
+        return reply
+
     def read_camera1_frame(self) -> FrameAcquired:
         """
         Reads the contents of the Camera1Frame register.
@@ -2018,12 +2219,12 @@ class Behavior(Device):
         FrameAcquired
             Value read from the Camera1Frame register.
         """
-        address = 94
+        address = BehaviorRegisters.CAMERA1_FRAME
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("Camera1Frame", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Camera1Frame")
 
-        return reply.payload
+        return FrameAcquired(reply.payload)
 
     def read_camera1_frequency(self) -> int:
         """
@@ -2034,14 +2235,15 @@ class Behavior(Device):
         int
             Value read from the Camera1Frequency register.
         """
-        address = 95
+        address = BehaviorRegisters.CAMERA1_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("Camera1Frequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("Camera1Frequency")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_camera1_frequency(self, value: int):
+    def write_camera1_frequency(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the Camera1Frequency register.
 
@@ -2050,10 +2252,13 @@ class Behavior(Device):
         value : int
             Value to write to the Camera1Frequency register.
         """
-        address = 95
+        address = BehaviorRegisters.CAMERA1_FREQUENCY
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("Camera1Frequency", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("Camera1Frequency")
+
+        return reply
+
     def read_servo_motor2_period(self) -> int:
         """
         Reads the contents of the ServoMotor2Period register.
@@ -2063,14 +2268,15 @@ class Behavior(Device):
         int
             Value read from the ServoMotor2Period register.
         """
-        address = 100
+        address = BehaviorRegisters.SERVO_MOTOR2_PERIOD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("ServoMotor2Period", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ServoMotor2Period")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_servo_motor2_period(self, value: int):
+    def write_servo_motor2_period(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the ServoMotor2Period register.
 
@@ -2079,10 +2285,13 @@ class Behavior(Device):
         value : int
             Value to write to the ServoMotor2Period register.
         """
-        address = 100
+        address = BehaviorRegisters.SERVO_MOTOR2_PERIOD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("ServoMotor2Period", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ServoMotor2Period")
+
+        return reply
+
     def read_servo_motor2_pulse(self) -> int:
         """
         Reads the contents of the ServoMotor2Pulse register.
@@ -2092,14 +2301,15 @@ class Behavior(Device):
         int
             Value read from the ServoMotor2Pulse register.
         """
-        address = 101
+        address = BehaviorRegisters.SERVO_MOTOR2_PULSE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("ServoMotor2Pulse", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ServoMotor2Pulse")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_servo_motor2_pulse(self, value: int):
+    def write_servo_motor2_pulse(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the ServoMotor2Pulse register.
 
@@ -2108,10 +2318,13 @@ class Behavior(Device):
         value : int
             Value to write to the ServoMotor2Pulse register.
         """
-        address = 101
+        address = BehaviorRegisters.SERVO_MOTOR2_PULSE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("ServoMotor2Pulse", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ServoMotor2Pulse")
+
+        return reply
+
     def read_servo_motor3_period(self) -> int:
         """
         Reads the contents of the ServoMotor3Period register.
@@ -2121,14 +2334,15 @@ class Behavior(Device):
         int
             Value read from the ServoMotor3Period register.
         """
-        address = 102
+        address = BehaviorRegisters.SERVO_MOTOR3_PERIOD
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("ServoMotor3Period", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ServoMotor3Period")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_servo_motor3_period(self, value: int):
+    def write_servo_motor3_period(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the ServoMotor3Period register.
 
@@ -2137,10 +2351,13 @@ class Behavior(Device):
         value : int
             Value to write to the ServoMotor3Period register.
         """
-        address = 102
+        address = BehaviorRegisters.SERVO_MOTOR3_PERIOD
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("ServoMotor3Period", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ServoMotor3Period")
+
+        return reply
+
     def read_servo_motor3_pulse(self) -> int:
         """
         Reads the contents of the ServoMotor3Pulse register.
@@ -2150,14 +2367,15 @@ class Behavior(Device):
         int
             Value read from the ServoMotor3Pulse register.
         """
-        address = 103
+        address = BehaviorRegisters.SERVO_MOTOR3_PULSE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("ServoMotor3Pulse", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ServoMotor3Pulse")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_servo_motor3_pulse(self, value: int):
+    def write_servo_motor3_pulse(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the ServoMotor3Pulse register.
 
@@ -2166,10 +2384,13 @@ class Behavior(Device):
         value : int
             Value to write to the ServoMotor3Pulse register.
         """
-        address = 103
+        address = BehaviorRegisters.SERVO_MOTOR3_PULSE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("ServoMotor3Pulse", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ServoMotor3Pulse")
+
+        return reply
+
     def read_encoder_reset(self) -> EncoderInputs:
         """
         Reads the contents of the EncoderReset register.
@@ -2179,14 +2400,14 @@ class Behavior(Device):
         EncoderInputs
             Value read from the EncoderReset register.
         """
-        address = 108
+        address = BehaviorRegisters.ENCODER_RESET
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EncoderReset", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EncoderReset")
 
-        return reply.payload
+        return EncoderInputs(reply.payload)
 
-    def write_encoder_reset(self, value: EncoderInputs):
+    def write_encoder_reset(self, value: EncoderInputs) -> ReplyHarpMessage | None:
         """
         Writes a value to the EncoderReset register.
 
@@ -2195,10 +2416,13 @@ class Behavior(Device):
         value : EncoderInputs
             Value to write to the EncoderReset register.
         """
-        address = 108
+        address = BehaviorRegisters.ENCODER_RESET
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EncoderReset", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EncoderReset")
+
+        return reply
+
     def read_enable_serial_timestamp(self) -> int:
         """
         Reads the contents of the EnableSerialTimestamp register.
@@ -2208,14 +2432,15 @@ class Behavior(Device):
         int
             Value read from the EnableSerialTimestamp register.
         """
-        address = 110
+        address = BehaviorRegisters.ENABLE_SERIAL_TIMESTAMP
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableSerialTimestamp", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableSerialTimestamp")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_enable_serial_timestamp(self, value: int):
+    def write_enable_serial_timestamp(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableSerialTimestamp register.
 
@@ -2224,10 +2449,13 @@ class Behavior(Device):
         value : int
             Value to write to the EnableSerialTimestamp register.
         """
-        address = 110
+        address = BehaviorRegisters.ENABLE_SERIAL_TIMESTAMP
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableSerialTimestamp", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableSerialTimestamp")
+
+        return reply
+
     def read_mimic_port0_ir(self) -> MimicOutput:
         """
         Reads the contents of the MimicPort0IR register.
@@ -2237,14 +2465,14 @@ class Behavior(Device):
         MimicOutput
             Value read from the MimicPort0IR register.
         """
-        address = 111
+        address = BehaviorRegisters.MIMIC_PORT0_IR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("MimicPort0IR", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("MimicPort0IR")
 
-        return reply.payload
+        return MimicOutput(reply.payload)
 
-    def write_mimic_port0_ir(self, value: MimicOutput):
+    def write_mimic_port0_ir(self, value: MimicOutput) -> ReplyHarpMessage | None:
         """
         Writes a value to the MimicPort0IR register.
 
@@ -2253,10 +2481,13 @@ class Behavior(Device):
         value : MimicOutput
             Value to write to the MimicPort0IR register.
         """
-        address = 111
+        address = BehaviorRegisters.MIMIC_PORT0_IR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("MimicPort0IR", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("MimicPort0IR")
+
+        return reply
+
     def read_mimic_port1_ir(self) -> MimicOutput:
         """
         Reads the contents of the MimicPort1IR register.
@@ -2266,14 +2497,14 @@ class Behavior(Device):
         MimicOutput
             Value read from the MimicPort1IR register.
         """
-        address = 112
+        address = BehaviorRegisters.MIMIC_PORT1_IR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("MimicPort1IR", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("MimicPort1IR")
 
-        return reply.payload
+        return MimicOutput(reply.payload)
 
-    def write_mimic_port1_ir(self, value: MimicOutput):
+    def write_mimic_port1_ir(self, value: MimicOutput) -> ReplyHarpMessage | None:
         """
         Writes a value to the MimicPort1IR register.
 
@@ -2282,10 +2513,13 @@ class Behavior(Device):
         value : MimicOutput
             Value to write to the MimicPort1IR register.
         """
-        address = 112
+        address = BehaviorRegisters.MIMIC_PORT1_IR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("MimicPort1IR", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("MimicPort1IR")
+
+        return reply
+
     def read_mimic_port2_ir(self) -> MimicOutput:
         """
         Reads the contents of the MimicPort2IR register.
@@ -2295,14 +2529,14 @@ class Behavior(Device):
         MimicOutput
             Value read from the MimicPort2IR register.
         """
-        address = 113
+        address = BehaviorRegisters.MIMIC_PORT2_IR
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("MimicPort2IR", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("MimicPort2IR")
 
-        return reply.payload
+        return MimicOutput(reply.payload)
 
-    def write_mimic_port2_ir(self, value: MimicOutput):
+    def write_mimic_port2_ir(self, value: MimicOutput) -> ReplyHarpMessage | None:
         """
         Writes a value to the MimicPort2IR register.
 
@@ -2311,10 +2545,13 @@ class Behavior(Device):
         value : MimicOutput
             Value to write to the MimicPort2IR register.
         """
-        address = 113
+        address = BehaviorRegisters.MIMIC_PORT2_IR
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("MimicPort2IR", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("MimicPort2IR")
+
+        return reply
+
     def read_mimic_port0_valve(self) -> MimicOutput:
         """
         Reads the contents of the MimicPort0Valve register.
@@ -2324,14 +2561,14 @@ class Behavior(Device):
         MimicOutput
             Value read from the MimicPort0Valve register.
         """
-        address = 117
+        address = BehaviorRegisters.MIMIC_PORT0_VALVE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("MimicPort0Valve", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("MimicPort0Valve")
 
-        return reply.payload
+        return MimicOutput(reply.payload)
 
-    def write_mimic_port0_valve(self, value: MimicOutput):
+    def write_mimic_port0_valve(self, value: MimicOutput) -> ReplyHarpMessage | None:
         """
         Writes a value to the MimicPort0Valve register.
 
@@ -2340,10 +2577,13 @@ class Behavior(Device):
         value : MimicOutput
             Value to write to the MimicPort0Valve register.
         """
-        address = 117
+        address = BehaviorRegisters.MIMIC_PORT0_VALVE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("MimicPort0Valve", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("MimicPort0Valve")
+
+        return reply
+
     def read_mimic_port1_valve(self) -> MimicOutput:
         """
         Reads the contents of the MimicPort1Valve register.
@@ -2353,14 +2593,14 @@ class Behavior(Device):
         MimicOutput
             Value read from the MimicPort1Valve register.
         """
-        address = 118
+        address = BehaviorRegisters.MIMIC_PORT1_VALVE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("MimicPort1Valve", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("MimicPort1Valve")
 
-        return reply.payload
+        return MimicOutput(reply.payload)
 
-    def write_mimic_port1_valve(self, value: MimicOutput):
+    def write_mimic_port1_valve(self, value: MimicOutput) -> ReplyHarpMessage | None:
         """
         Writes a value to the MimicPort1Valve register.
 
@@ -2369,10 +2609,13 @@ class Behavior(Device):
         value : MimicOutput
             Value to write to the MimicPort1Valve register.
         """
-        address = 118
+        address = BehaviorRegisters.MIMIC_PORT1_VALVE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("MimicPort1Valve", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("MimicPort1Valve")
+
+        return reply
+
     def read_mimic_port2_valve(self) -> MimicOutput:
         """
         Reads the contents of the MimicPort2Valve register.
@@ -2382,14 +2625,14 @@ class Behavior(Device):
         MimicOutput
             Value read from the MimicPort2Valve register.
         """
-        address = 119
+        address = BehaviorRegisters.MIMIC_PORT2_VALVE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("MimicPort2Valve", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("MimicPort2Valve")
 
-        return reply.payload
+        return MimicOutput(reply.payload)
 
-    def write_mimic_port2_valve(self, value: MimicOutput):
+    def write_mimic_port2_valve(self, value: MimicOutput) -> ReplyHarpMessage | None:
         """
         Writes a value to the MimicPort2Valve register.
 
@@ -2398,10 +2641,13 @@ class Behavior(Device):
         value : MimicOutput
             Value to write to the MimicPort2Valve register.
         """
-        address = 119
+        address = BehaviorRegisters.MIMIC_PORT2_VALVE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("MimicPort2Valve", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("MimicPort2Valve")
+
+        return reply
+
     def read_poke_input_filter(self) -> int:
         """
         Reads the contents of the PokeInputFilter register.
@@ -2411,14 +2657,15 @@ class Behavior(Device):
         int
             Value read from the PokeInputFilter register.
         """
-        address = 122
+        address = BehaviorRegisters.POKE_INPUT_FILTER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("PokeInputFilter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("PokeInputFilter")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_poke_input_filter(self, value: int):
+    def write_poke_input_filter(self, value: int) -> ReplyHarpMessage | None:
         """
         Writes a value to the PokeInputFilter register.
 
@@ -2427,7 +2674,10 @@ class Behavior(Device):
         value : int
             Value to write to the PokeInputFilter register.
         """
-        address = 122
+        address = BehaviorRegisters.POKE_INPUT_FILTER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("PokeInputFilter", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("PokeInputFilter")
+
+        return reply
+

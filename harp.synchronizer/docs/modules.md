@@ -1,1 +1,1 @@
-::: harp.devices.synchronizer.harpdevice
+::: harp.devices.synchronizer

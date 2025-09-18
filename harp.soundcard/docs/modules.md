@@ -1,1 +1,1 @@
-::: harp.devices.soundcard.harpdevice
+::: harp.devices.soundcard

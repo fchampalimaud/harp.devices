@@ -1,1 +1,1 @@
-::: harp.devices.ledarray.harpdevice
+::: harp.devices.ledarray

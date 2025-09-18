@@ -1,1 +1,1 @@
-::: harp.devices.behavior.harpdevice
+::: harp.devices.behavior

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from enum import Enum, IntFlag
+from enum import IntEnum, IntFlag
 
-from harp.communication import Device
 from harp.protocol import MessageType, PayloadType
 from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage
-
+from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.serial import Device
 
 
 class AudioChannels(IntFlag):
@@ -110,7 +109,7 @@ class AudioSwitchEvents(IntFlag):
     DIGITAL_INPUTS_STATE = 0x2
 
 
-class ControlSource(Enum):
+class ControlSource(IntEnum):
     """
     Available configurations to control the board channels (host computer or digital inputs).
 
@@ -126,7 +125,7 @@ class ControlSource(Enum):
     DIGITAL_INPUTS = 1
 
 
-class DI4TriggerConfig(Enum):
+class DI4TriggerConfig(IntEnum):
     """
     Available configurations for DI4. Can be used as digital input or as the MSB of the switches address when the SourceControl is configured as DigitalInputs.
 
@@ -142,7 +141,7 @@ class DI4TriggerConfig(Enum):
     ADDRESS = 1
 
 
-class DO0SyncConfig(Enum):
+class DO0SyncConfig(IntEnum):
     """
     Available configurations when using DO0 pin to report firmware events.
 
@@ -158,7 +157,7 @@ class DO0SyncConfig(Enum):
     TOGGLE_ON_CHANNEL_CHANGE = 1
 
 
-class AudioSwitchRegisters(Enum):
+class AudioSwitchRegisters(IntEnum):
     """Enum for all available registers in the AudioSwitch device.
 
     Attributes
@@ -178,6 +177,7 @@ class AudioSwitchRegisters(Enum):
     ENABLE_EVENTS : int
         Specifies the active events in the device.
     """
+
     CONTROL_MODE = 32
     ENABLE_CHANNELS = 33
     DIGITAL_INPUT_STATE = 34
@@ -210,14 +210,14 @@ class AudioSwitch(Device):
         ControlSource
             Value read from the ControlMode register.
         """
-        address = 32
+        address = AudioSwitchRegisters.CONTROL_MODE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("ControlMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("ControlMode")
 
-        return reply.payload
+        return ControlSource(reply.payload)
 
-    def write_control_mode(self, value: ControlSource):
+    def write_control_mode(self, value: ControlSource) -> ReplyHarpMessage | None:
         """
         Writes a value to the ControlMode register.
 
@@ -226,10 +226,13 @@ class AudioSwitch(Device):
         value : ControlSource
             Value to write to the ControlMode register.
         """
-        address = 32
+        address = AudioSwitchRegisters.CONTROL_MODE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("ControlMode", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("ControlMode")
+
+        return reply
+
     def read_enable_channels(self) -> AudioChannels:
         """
         Reads the contents of the EnableChannels register.
@@ -239,14 +242,14 @@ class AudioSwitch(Device):
         AudioChannels
             Value read from the EnableChannels register.
         """
-        address = 33
+        address = AudioSwitchRegisters.ENABLE_CHANNELS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
-        if reply.is_error:
-            raise HarpReadException("EnableChannels", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableChannels")
 
-        return reply.payload
+        return AudioChannels(reply.payload)
 
-    def write_enable_channels(self, value: AudioChannels):
+    def write_enable_channels(self, value: AudioChannels) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableChannels register.
 
@@ -255,10 +258,13 @@ class AudioSwitch(Device):
         value : AudioChannels
             Value to write to the EnableChannels register.
         """
-        address = 33
+        address = AudioSwitchRegisters.ENABLE_CHANNELS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableChannels", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableChannels")
+
+        return reply
+
     def read_digital_input_state(self) -> DigitalInputs:
         """
         Reads the contents of the DigitalInputState register.
@@ -268,12 +274,12 @@ class AudioSwitch(Device):
         DigitalInputs
             Value read from the DigitalInputState register.
         """
-        address = 34
+        address = AudioSwitchRegisters.DIGITAL_INPUT_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DigitalInputState", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DigitalInputState")
 
-        return reply.payload
+        return DigitalInputs(reply.payload)
 
     def read_do0_state(self) -> bool:
         """
@@ -284,14 +290,15 @@ class AudioSwitch(Device):
         bool
             Value read from the DO0State register.
         """
-        address = 35
+        address = AudioSwitchRegisters.DO0_STATE
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0State", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0State")
 
+        # Directly return the payload as it is a primitive type
         return reply.payload
 
-    def write_do0_state(self, value: bool):
+    def write_do0_state(self, value: bool) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0State register.
 
@@ -300,10 +307,13 @@ class AudioSwitch(Device):
         value : bool
             Value to write to the DO0State register.
         """
-        address = 35
+        address = AudioSwitchRegisters.DO0_STATE
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0State", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0State")
+
+        return reply
+
     def read_di4_trigger(self) -> DI4TriggerConfig:
         """
         Reads the contents of the DI4Trigger register.
@@ -313,14 +323,14 @@ class AudioSwitch(Device):
         DI4TriggerConfig
             Value read from the DI4Trigger register.
         """
-        address = 37
+        address = AudioSwitchRegisters.DI4_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DI4Trigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DI4Trigger")
 
-        return reply.payload
+        return DI4TriggerConfig(reply.payload)
 
-    def write_di4_trigger(self, value: DI4TriggerConfig):
+    def write_di4_trigger(self, value: DI4TriggerConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the DI4Trigger register.
 
@@ -329,10 +339,13 @@ class AudioSwitch(Device):
         value : DI4TriggerConfig
             Value to write to the DI4Trigger register.
         """
-        address = 37
+        address = AudioSwitchRegisters.DI4_TRIGGER
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DI4Trigger", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DI4Trigger")
+
+        return reply
+
     def read_do0_sync(self) -> DO0SyncConfig:
         """
         Reads the contents of the DO0Sync register.
@@ -342,14 +355,14 @@ class AudioSwitch(Device):
         DO0SyncConfig
             Value read from the DO0Sync register.
         """
-        address = 38
+        address = AudioSwitchRegisters.DO0_SYNC
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("DO0Sync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("DO0Sync")
 
-        return reply.payload
+        return DO0SyncConfig(reply.payload)
 
-    def write_do0_sync(self, value: DO0SyncConfig):
+    def write_do0_sync(self, value: DO0SyncConfig) -> ReplyHarpMessage | None:
         """
         Writes a value to the DO0Sync register.
 
@@ -358,10 +371,13 @@ class AudioSwitch(Device):
         value : DO0SyncConfig
             Value to write to the DO0Sync register.
         """
-        address = 38
+        address = AudioSwitchRegisters.DO0_SYNC
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("DO0Sync", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("DO0Sync")
+
+        return reply
+
     def read_enable_events(self) -> AudioSwitchEvents:
         """
         Reads the contents of the EnableEvents register.
@@ -371,14 +387,14 @@ class AudioSwitch(Device):
         AudioSwitchEvents
             Value read from the EnableEvents register.
         """
-        address = 39
+        address = AudioSwitchRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
-        if reply.is_error:
-            raise HarpReadException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpReadException("EnableEvents")
 
-        return reply.payload
+        return AudioSwitchEvents(reply.payload)
 
-    def write_enable_events(self, value: AudioSwitchEvents):
+    def write_enable_events(self, value: AudioSwitchEvents) -> ReplyHarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -387,7 +403,10 @@ class AudioSwitch(Device):
         value : AudioSwitchEvents
             Value to write to the EnableEvents register.
         """
-        address = 39
+        address = AudioSwitchRegisters.ENABLE_EVENTS
         reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
-        if reply.is_error:
-            raise HarpWriteException("EnableEvents", reply.error_message)
+        if reply is not None and reply.is_error:
+            raise HarpWriteException("EnableEvents")
+
+        return reply
+
