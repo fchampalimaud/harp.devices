@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 
 from harp.protocol import MessageType, PayloadType
-from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.protocol.exceptions import HarpException, HarpReadException, HarpWriteException
+from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
 
@@ -28,15 +28,15 @@ class DigitalOutputs(IntFlag):
     Attributes
     ----------
     DO0 : int
-        Digital Output 0
+        _No description currently available_
     DO1 : int
-        Digital Output 1
+        _No description currently available_
     DO2 : int
-        Digital Output 2
+        _No description currently available_
     DO3 : int
-        Digital Output 3
+        _No description currently available_
     DO4 : int
-        Digital Output 4
+        _No description currently available_
     """
 
     NONE = 0x0
@@ -182,26 +182,29 @@ class RgbArray(Device):
         # verify that WHO_AM_I matches the expected value
         if self.WHO_AM_I != 1264:
             self.disconnect()
-            raise Exception(f"WHO_AM_I mismatch: expected {1264}, got {self.WHO_AM_I}")
+            raise HarpException(f"WHO_AM_I mismatch: expected {1264}, got {self.WHO_AM_I}")
 
-    def read_led_status(self) -> int:
+    def read_led_status(self) -> int | None:
         """
         Reads the contents of the LedStatus register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the LedStatus register.
         """
         address = RgbArrayRegisters.LED_STATUS
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("LedStatus")
+            raise HarpReadException("RgbArrayRegisters.LED_STATUS", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_led_status(self, value: int) -> ReplyHarpMessage | None:
+    def write_led_status(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the LedStatus register.
 
@@ -211,30 +214,33 @@ class RgbArray(Device):
             Value to write to the LedStatus register.
         """
         address = RgbArrayRegisters.LED_STATUS
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("LedStatus")
+            raise HarpWriteException("RgbArrayRegisters.LED_STATUS", reply)
 
         return reply
 
-    def read_led_count(self) -> int:
+    def read_led_count(self) -> int | None:
         """
         Reads the contents of the LedCount register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the LedCount register.
         """
         address = RgbArrayRegisters.LED_COUNT
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("LedCount")
+            raise HarpReadException("RgbArrayRegisters.LED_COUNT", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_led_count(self, value: int) -> ReplyHarpMessage | None:
+    def write_led_count(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the LedCount register.
 
@@ -244,30 +250,33 @@ class RgbArray(Device):
             Value to write to the LedCount register.
         """
         address = RgbArrayRegisters.LED_COUNT
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("LedCount")
+            raise HarpWriteException("RgbArrayRegisters.LED_COUNT", reply)
 
         return reply
 
-    def read_rgb_state(self) -> bytes:
+    def read_rgb_state(self) -> bytes | None:
         """
         Reads the contents of the RgbState register.
 
         Returns
         -------
-        bytes
+        bytes | None
             Value read from the RgbState register.
         """
         address = RgbArrayRegisters.RGB_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("RgbState")
+            raise HarpReadException("RgbArrayRegisters.RGB_STATE", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_rgb_state(self, value: bytes) -> ReplyHarpMessage | None:
+    def write_rgb_state(self, value: bytes) -> HarpMessage | None:
         """
         Writes a value to the RgbState register.
 
@@ -277,30 +286,33 @@ class RgbArray(Device):
             Value to write to the RgbState register.
         """
         address = RgbArrayRegisters.RGB_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("RgbState")
+            raise HarpWriteException("RgbArrayRegisters.RGB_STATE", reply)
 
         return reply
 
-    def read_rgb_bus0_state(self) -> bytes:
+    def read_rgb_bus0_state(self) -> bytes | None:
         """
         Reads the contents of the RgbBus0State register.
 
         Returns
         -------
-        bytes
+        bytes | None
             Value read from the RgbBus0State register.
         """
         address = RgbArrayRegisters.RGB_BUS0_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("RgbBus0State")
+            raise HarpReadException("RgbArrayRegisters.RGB_BUS0_STATE", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_rgb_bus0_state(self, value: bytes) -> ReplyHarpMessage | None:
+    def write_rgb_bus0_state(self, value: bytes) -> HarpMessage | None:
         """
         Writes a value to the RgbBus0State register.
 
@@ -310,30 +322,33 @@ class RgbArray(Device):
             Value to write to the RgbBus0State register.
         """
         address = RgbArrayRegisters.RGB_BUS0_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("RgbBus0State")
+            raise HarpWriteException("RgbArrayRegisters.RGB_BUS0_STATE", reply)
 
         return reply
 
-    def read_rgb_bus1_state(self) -> bytes:
+    def read_rgb_bus1_state(self) -> bytes | None:
         """
         Reads the contents of the RgbBus1State register.
 
         Returns
         -------
-        bytes
+        bytes | None
             Value read from the RgbBus1State register.
         """
         address = RgbArrayRegisters.RGB_BUS1_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("RgbBus1State")
+            raise HarpReadException("RgbArrayRegisters.RGB_BUS1_STATE", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_rgb_bus1_state(self, value: bytes) -> ReplyHarpMessage | None:
+    def write_rgb_bus1_state(self, value: bytes) -> HarpMessage | None:
         """
         Writes a value to the RgbBus1State register.
 
@@ -343,30 +358,33 @@ class RgbArray(Device):
             Value to write to the RgbBus1State register.
         """
         address = RgbArrayRegisters.RGB_BUS1_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("RgbBus1State")
+            raise HarpWriteException("RgbArrayRegisters.RGB_BUS1_STATE", reply)
 
         return reply
 
-    def read_rgb_off_state(self) -> bytes:
+    def read_rgb_off_state(self) -> bytes | None:
         """
         Reads the contents of the RgbOffState register.
 
         Returns
         -------
-        bytes
+        bytes | None
             Value read from the RgbOffState register.
         """
         address = RgbArrayRegisters.RGB_OFF_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("RgbOffState")
+            raise HarpReadException("RgbArrayRegisters.RGB_OFF_STATE", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_rgb_off_state(self, value: bytes) -> ReplyHarpMessage | None:
+    def write_rgb_off_state(self, value: bytes) -> HarpMessage | None:
         """
         Writes a value to the RgbOffState register.
 
@@ -376,29 +394,32 @@ class RgbArray(Device):
             Value to write to the RgbOffState register.
         """
         address = RgbArrayRegisters.RGB_OFF_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("RgbOffState")
+            raise HarpWriteException("RgbArrayRegisters.RGB_OFF_STATE", reply)
 
         return reply
 
-    def read_di0_mode(self) -> DI0ModeConfig:
+    def read_di0_mode(self) -> DI0ModeConfig | None:
         """
         Reads the contents of the DI0Mode register.
 
         Returns
         -------
-        DI0ModeConfig
+        DI0ModeConfig | None
             Value read from the DI0Mode register.
         """
         address = RgbArrayRegisters.DI0_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DI0Mode")
+            raise HarpReadException("RgbArrayRegisters.DI0_MODE", reply)
 
-        return DI0ModeConfig(reply.payload)
+        if reply is not None:
+            return DI0ModeConfig(reply.payload)
+      
+        return None
 
-    def write_di0_mode(self, value: DI0ModeConfig) -> ReplyHarpMessage | None:
+    def write_di0_mode(self, value: DI0ModeConfig) -> HarpMessage | None:
         """
         Writes a value to the DI0Mode register.
 
@@ -408,29 +429,32 @@ class RgbArray(Device):
             Value to write to the DI0Mode register.
         """
         address = RgbArrayRegisters.DI0_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DI0Mode")
+            raise HarpWriteException("RgbArrayRegisters.DI0_MODE", reply)
 
         return reply
 
-    def read_do0_mode(self) -> DOModeConfig:
+    def read_do0_mode(self) -> DOModeConfig | None:
         """
         Reads the contents of the DO0Mode register.
 
         Returns
         -------
-        DOModeConfig
+        DOModeConfig | None
             Value read from the DO0Mode register.
         """
         address = RgbArrayRegisters.DO0_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DO0Mode")
+            raise HarpReadException("RgbArrayRegisters.DO0_MODE", reply)
 
-        return DOModeConfig(reply.payload)
+        if reply is not None:
+            return DOModeConfig(reply.payload)
+      
+        return None
 
-    def write_do0_mode(self, value: DOModeConfig) -> ReplyHarpMessage | None:
+    def write_do0_mode(self, value: DOModeConfig) -> HarpMessage | None:
         """
         Writes a value to the DO0Mode register.
 
@@ -440,29 +464,32 @@ class RgbArray(Device):
             Value to write to the DO0Mode register.
         """
         address = RgbArrayRegisters.DO0_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DO0Mode")
+            raise HarpWriteException("RgbArrayRegisters.DO0_MODE", reply)
 
         return reply
 
-    def read_do1_mode(self) -> DOModeConfig:
+    def read_do1_mode(self) -> DOModeConfig | None:
         """
         Reads the contents of the DO1Mode register.
 
         Returns
         -------
-        DOModeConfig
+        DOModeConfig | None
             Value read from the DO1Mode register.
         """
         address = RgbArrayRegisters.DO1_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DO1Mode")
+            raise HarpReadException("RgbArrayRegisters.DO1_MODE", reply)
 
-        return DOModeConfig(reply.payload)
+        if reply is not None:
+            return DOModeConfig(reply.payload)
+      
+        return None
 
-    def write_do1_mode(self, value: DOModeConfig) -> ReplyHarpMessage | None:
+    def write_do1_mode(self, value: DOModeConfig) -> HarpMessage | None:
         """
         Writes a value to the DO1Mode register.
 
@@ -472,30 +499,33 @@ class RgbArray(Device):
             Value to write to the DO1Mode register.
         """
         address = RgbArrayRegisters.DO1_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DO1Mode")
+            raise HarpWriteException("RgbArrayRegisters.DO1_MODE", reply)
 
         return reply
 
-    def read_latch_on_next_update(self) -> bool:
+    def read_latch_on_next_update(self) -> bool | None:
         """
         Reads the contents of the LatchOnNextUpdate register.
 
         Returns
         -------
-        bool
+        bool | None
             Value read from the LatchOnNextUpdate register.
         """
         address = RgbArrayRegisters.LATCH_ON_NEXT_UPDATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("LatchOnNextUpdate")
+            raise HarpReadException("RgbArrayRegisters.LATCH_ON_NEXT_UPDATE", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_latch_on_next_update(self, value: bool) -> ReplyHarpMessage | None:
+    def write_latch_on_next_update(self, value: bool) -> HarpMessage | None:
         """
         Writes a value to the LatchOnNextUpdate register.
 
@@ -505,45 +535,51 @@ class RgbArray(Device):
             Value to write to the LatchOnNextUpdate register.
         """
         address = RgbArrayRegisters.LATCH_ON_NEXT_UPDATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("LatchOnNextUpdate")
+            raise HarpWriteException("RgbArrayRegisters.LATCH_ON_NEXT_UPDATE", reply)
 
         return reply
 
-    def read_digital_input_state(self) -> DigitalInputs:
+    def read_digital_input_state(self) -> DigitalInputs | None:
         """
         Reads the contents of the DigitalInputState register.
 
         Returns
         -------
-        DigitalInputs
+        DigitalInputs | None
             Value read from the DigitalInputState register.
         """
         address = RgbArrayRegisters.DIGITAL_INPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalInputState")
+            raise HarpReadException("RgbArrayRegisters.DIGITAL_INPUT_STATE", reply)
 
-        return DigitalInputs(reply.payload)
+        if reply is not None:
+            return DigitalInputs(reply.payload)
+      
+        return None
 
-    def read_output_set(self) -> DigitalOutputs:
+    def read_output_set(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputSet register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputSet register.
         """
         address = RgbArrayRegisters.OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputSet")
+            raise HarpReadException("RgbArrayRegisters.OUTPUT_SET", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputSet register.
 
@@ -553,29 +589,32 @@ class RgbArray(Device):
             Value to write to the OutputSet register.
         """
         address = RgbArrayRegisters.OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputSet")
+            raise HarpWriteException("RgbArrayRegisters.OUTPUT_SET", reply)
 
         return reply
 
-    def read_output_clear(self) -> DigitalOutputs:
+    def read_output_clear(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputClear register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputClear register.
         """
         address = RgbArrayRegisters.OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputClear")
+            raise HarpReadException("RgbArrayRegisters.OUTPUT_CLEAR", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputClear register.
 
@@ -585,29 +624,32 @@ class RgbArray(Device):
             Value to write to the OutputClear register.
         """
         address = RgbArrayRegisters.OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputClear")
+            raise HarpWriteException("RgbArrayRegisters.OUTPUT_CLEAR", reply)
 
         return reply
 
-    def read_output_toggle(self) -> DigitalOutputs:
+    def read_output_toggle(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputToggle register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputToggle register.
         """
         address = RgbArrayRegisters.OUTPUT_TOGGLE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputToggle")
+            raise HarpReadException("RgbArrayRegisters.OUTPUT_TOGGLE", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputToggle register.
 
@@ -617,29 +659,32 @@ class RgbArray(Device):
             Value to write to the OutputToggle register.
         """
         address = RgbArrayRegisters.OUTPUT_TOGGLE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputToggle")
+            raise HarpWriteException("RgbArrayRegisters.OUTPUT_TOGGLE", reply)
 
         return reply
 
-    def read_output_state(self) -> DigitalOutputs:
+    def read_output_state(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputState register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputState register.
         """
         address = RgbArrayRegisters.OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputState")
+            raise HarpReadException("RgbArrayRegisters.OUTPUT_STATE", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputState register.
 
@@ -649,30 +694,33 @@ class RgbArray(Device):
             Value to write to the OutputState register.
         """
         address = RgbArrayRegisters.OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputState")
+            raise HarpWriteException("RgbArrayRegisters.OUTPUT_STATE", reply)
 
         return reply
 
-    def read_digital_output_pulse_period(self) -> int:
+    def read_digital_output_pulse_period(self) -> int | None:
         """
         Reads the contents of the DigitalOutputPulsePeriod register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the DigitalOutputPulsePeriod register.
         """
         address = RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalOutputPulsePeriod")
+            raise HarpReadException("RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_PERIOD", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_digital_output_pulse_period(self, value: int) -> ReplyHarpMessage | None:
+    def write_digital_output_pulse_period(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the DigitalOutputPulsePeriod register.
 
@@ -682,30 +730,33 @@ class RgbArray(Device):
             Value to write to the DigitalOutputPulsePeriod register.
         """
         address = RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DigitalOutputPulsePeriod")
+            raise HarpWriteException("RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_PERIOD", reply)
 
         return reply
 
-    def read_digital_output_pulse_count(self) -> int:
+    def read_digital_output_pulse_count(self) -> int | None:
         """
         Reads the contents of the DigitalOutputPulseCount register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the DigitalOutputPulseCount register.
         """
         address = RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_COUNT
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalOutputPulseCount")
+            raise HarpReadException("RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_COUNT", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_digital_output_pulse_count(self, value: int) -> ReplyHarpMessage | None:
+    def write_digital_output_pulse_count(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the DigitalOutputPulseCount register.
 
@@ -715,29 +766,32 @@ class RgbArray(Device):
             Value to write to the DigitalOutputPulseCount register.
         """
         address = RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_COUNT
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DigitalOutputPulseCount")
+            raise HarpWriteException("RgbArrayRegisters.DIGITAL_OUTPUT_PULSE_COUNT", reply)
 
         return reply
 
-    def read_event_enable(self) -> RgbArrayEvents:
+    def read_event_enable(self) -> RgbArrayEvents | None:
         """
         Reads the contents of the EventEnable register.
 
         Returns
         -------
-        RgbArrayEvents
+        RgbArrayEvents | None
             Value read from the EventEnable register.
         """
         address = RgbArrayRegisters.EVENT_ENABLE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EventEnable")
+            raise HarpReadException("RgbArrayRegisters.EVENT_ENABLE", reply)
 
-        return RgbArrayEvents(reply.payload)
+        if reply is not None:
+            return RgbArrayEvents(reply.payload)
+      
+        return None
 
-    def write_event_enable(self, value: RgbArrayEvents) -> ReplyHarpMessage | None:
+    def write_event_enable(self, value: RgbArrayEvents) -> HarpMessage | None:
         """
         Writes a value to the EventEnable register.
 
@@ -747,9 +801,9 @@ class RgbArray(Device):
             Value to write to the EventEnable register.
         """
         address = RgbArrayRegisters.EVENT_ENABLE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EventEnable")
+            raise HarpWriteException("RgbArrayRegisters.EVENT_ENABLE", reply)
 
         return reply
 

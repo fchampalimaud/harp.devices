@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 
 from harp.protocol import MessageType, PayloadType
-from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.protocol.exceptions import HarpException, HarpReadException, HarpWriteException
+from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
 
@@ -235,25 +235,28 @@ class CameraController(Device):
         # verify that WHO_AM_I matches the expected value
         if self.WHO_AM_I != 1168:
             self.disconnect()
-            raise Exception(f"WHO_AM_I mismatch: expected {1168}, got {self.WHO_AM_I}")
+            raise HarpException(f"WHO_AM_I mismatch: expected {1168}, got {self.WHO_AM_I}")
 
-    def read_camera_start(self) -> Cameras:
+    def read_camera_start(self) -> Cameras | None:
         """
         Reads the contents of the CameraStart register.
 
         Returns
         -------
-        Cameras
+        Cameras | None
             Value read from the CameraStart register.
         """
         address = CameraControllerRegisters.CAMERA_START
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("CameraStart")
+            raise HarpReadException("CameraControllerRegisters.CAMERA_START", reply)
 
-        return Cameras(reply.payload)
+        if reply is not None:
+            return Cameras(reply.payload)
+      
+        return None
 
-    def write_camera_start(self, value: Cameras) -> ReplyHarpMessage | None:
+    def write_camera_start(self, value: Cameras) -> HarpMessage | None:
         """
         Writes a value to the CameraStart register.
 
@@ -263,29 +266,32 @@ class CameraController(Device):
             Value to write to the CameraStart register.
         """
         address = CameraControllerRegisters.CAMERA_START
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("CameraStart")
+            raise HarpWriteException("CameraControllerRegisters.CAMERA_START", reply)
 
         return reply
 
-    def read_camera_stop(self) -> Cameras:
+    def read_camera_stop(self) -> Cameras | None:
         """
         Reads the contents of the CameraStop register.
 
         Returns
         -------
-        Cameras
+        Cameras | None
             Value read from the CameraStop register.
         """
         address = CameraControllerRegisters.CAMERA_STOP
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("CameraStop")
+            raise HarpReadException("CameraControllerRegisters.CAMERA_STOP", reply)
 
-        return Cameras(reply.payload)
+        if reply is not None:
+            return Cameras(reply.payload)
+      
+        return None
 
-    def write_camera_stop(self, value: Cameras) -> ReplyHarpMessage | None:
+    def write_camera_stop(self, value: Cameras) -> HarpMessage | None:
         """
         Writes a value to the CameraStop register.
 
@@ -295,29 +301,32 @@ class CameraController(Device):
             Value to write to the CameraStop register.
         """
         address = CameraControllerRegisters.CAMERA_STOP
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("CameraStop")
+            raise HarpWriteException("CameraControllerRegisters.CAMERA_STOP", reply)
 
         return reply
 
-    def read_servo_enable(self) -> Servos:
+    def read_servo_enable(self) -> Servos | None:
         """
         Reads the contents of the ServoEnable register.
 
         Returns
         -------
-        Servos
+        Servos | None
             Value read from the ServoEnable register.
         """
         address = CameraControllerRegisters.SERVO_ENABLE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ServoEnable")
+            raise HarpReadException("CameraControllerRegisters.SERVO_ENABLE", reply)
 
-        return Servos(reply.payload)
+        if reply is not None:
+            return Servos(reply.payload)
+      
+        return None
 
-    def write_servo_enable(self, value: Servos) -> ReplyHarpMessage | None:
+    def write_servo_enable(self, value: Servos) -> HarpMessage | None:
         """
         Writes a value to the ServoEnable register.
 
@@ -327,29 +336,32 @@ class CameraController(Device):
             Value to write to the ServoEnable register.
         """
         address = CameraControllerRegisters.SERVO_ENABLE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("ServoEnable")
+            raise HarpWriteException("CameraControllerRegisters.SERVO_ENABLE", reply)
 
         return reply
 
-    def read_servo_disable(self) -> Servos:
+    def read_servo_disable(self) -> Servos | None:
         """
         Reads the contents of the ServoDisable register.
 
         Returns
         -------
-        Servos
+        Servos | None
             Value read from the ServoDisable register.
         """
         address = CameraControllerRegisters.SERVO_DISABLE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ServoDisable")
+            raise HarpReadException("CameraControllerRegisters.SERVO_DISABLE", reply)
 
-        return Servos(reply.payload)
+        if reply is not None:
+            return Servos(reply.payload)
+      
+        return None
 
-    def write_servo_disable(self, value: Servos) -> ReplyHarpMessage | None:
+    def write_servo_disable(self, value: Servos) -> HarpMessage | None:
         """
         Writes a value to the ServoDisable register.
 
@@ -359,29 +371,32 @@ class CameraController(Device):
             Value to write to the ServoDisable register.
         """
         address = CameraControllerRegisters.SERVO_DISABLE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("ServoDisable")
+            raise HarpWriteException("CameraControllerRegisters.SERVO_DISABLE", reply)
 
         return reply
 
-    def read_output_set(self) -> DigitalOutputs:
+    def read_output_set(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputSet register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputSet register.
         """
         address = CameraControllerRegisters.OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputSet")
+            raise HarpReadException("CameraControllerRegisters.OUTPUT_SET", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputSet register.
 
@@ -391,29 +406,32 @@ class CameraController(Device):
             Value to write to the OutputSet register.
         """
         address = CameraControllerRegisters.OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputSet")
+            raise HarpWriteException("CameraControllerRegisters.OUTPUT_SET", reply)
 
         return reply
 
-    def read_output_clear(self) -> DigitalOutputs:
+    def read_output_clear(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputClear register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputClear register.
         """
         address = CameraControllerRegisters.OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputClear")
+            raise HarpReadException("CameraControllerRegisters.OUTPUT_CLEAR", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputClear register.
 
@@ -423,29 +441,32 @@ class CameraController(Device):
             Value to write to the OutputClear register.
         """
         address = CameraControllerRegisters.OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputClear")
+            raise HarpWriteException("CameraControllerRegisters.OUTPUT_CLEAR", reply)
 
         return reply
 
-    def read_output_state(self) -> DigitalOutputs:
+    def read_output_state(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputState register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputState register.
         """
         address = CameraControllerRegisters.OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputState")
+            raise HarpReadException("CameraControllerRegisters.OUTPUT_STATE", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputState register.
 
@@ -455,130 +476,151 @@ class CameraController(Device):
             Value to write to the OutputState register.
         """
         address = CameraControllerRegisters.OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputState")
+            raise HarpWriteException("CameraControllerRegisters.OUTPUT_STATE", reply)
 
         return reply
 
-    def read_digital_input_state(self) -> DigitalInputs:
+    def read_digital_input_state(self) -> DigitalInputs | None:
         """
         Reads the contents of the DigitalInputState register.
 
         Returns
         -------
-        DigitalInputs
+        DigitalInputs | None
             Value read from the DigitalInputState register.
         """
         address = CameraControllerRegisters.DIGITAL_INPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalInputState")
+            raise HarpReadException("CameraControllerRegisters.DIGITAL_INPUT_STATE", reply)
 
-        return DigitalInputs(reply.payload)
+        if reply is not None:
+            return DigitalInputs(reply.payload)
+      
+        return None
 
-    def read_camera0_trigger(self) -> int:
+    def read_camera0_trigger(self) -> int | None:
         """
         Reads the contents of the Camera0Trigger register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Camera0Trigger register.
         """
         address = CameraControllerRegisters.CAMERA0_TRIGGER
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Camera0Trigger")
+            raise HarpReadException("CameraControllerRegisters.CAMERA0_TRIGGER", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def read_camera1_trigger(self) -> int:
+    def read_camera1_trigger(self) -> int | None:
         """
         Reads the contents of the Camera1Trigger register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Camera1Trigger register.
         """
         address = CameraControllerRegisters.CAMERA1_TRIGGER
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Camera1Trigger")
+            raise HarpReadException("CameraControllerRegisters.CAMERA1_TRIGGER", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def read_camera0_sync(self) -> int:
+    def read_camera0_sync(self) -> int | None:
         """
         Reads the contents of the Camera0Sync register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Camera0Sync register.
         """
         address = CameraControllerRegisters.CAMERA0_SYNC
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Camera0Sync")
+            raise HarpReadException("CameraControllerRegisters.CAMERA0_SYNC", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def read_camera1_sync(self) -> int:
+    def read_camera1_sync(self) -> int | None:
         """
         Reads the contents of the Camera1Sync register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Camera1Sync register.
         """
         address = CameraControllerRegisters.CAMERA1_SYNC
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Camera1Sync")
+            raise HarpReadException("CameraControllerRegisters.CAMERA1_SYNC", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def read_servo_state(self) -> Servos:
+    def read_servo_state(self) -> Servos | None:
         """
         Reads the contents of the ServoState register.
 
         Returns
         -------
-        Servos
+        Servos | None
             Value read from the ServoState register.
         """
         address = CameraControllerRegisters.SERVO_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ServoState")
+            raise HarpReadException("CameraControllerRegisters.SERVO_STATE", reply)
 
-        return Servos(reply.payload)
+        if reply is not None:
+            return Servos(reply.payload)
+      
+        return None
 
-    def read_sync_interval(self) -> int:
+    def read_sync_interval(self) -> int | None:
         """
         Reads the contents of the SyncInterval register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SyncInterval register.
         """
         address = CameraControllerRegisters.SYNC_INTERVAL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SyncInterval")
+            raise HarpReadException("CameraControllerRegisters.SYNC_INTERVAL", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_sync_interval(self, value: int) -> ReplyHarpMessage | None:
+    def write_sync_interval(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SyncInterval register.
 
@@ -588,29 +630,32 @@ class CameraController(Device):
             Value to write to the SyncInterval register.
         """
         address = CameraControllerRegisters.SYNC_INTERVAL
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SyncInterval")
+            raise HarpWriteException("CameraControllerRegisters.SYNC_INTERVAL", reply)
 
         return reply
 
-    def read_di0_mode(self) -> DI0ModeConfig:
+    def read_di0_mode(self) -> DI0ModeConfig | None:
         """
         Reads the contents of the DI0Mode register.
 
         Returns
         -------
-        DI0ModeConfig
+        DI0ModeConfig | None
             Value read from the DI0Mode register.
         """
         address = CameraControllerRegisters.DI0_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DI0Mode")
+            raise HarpReadException("CameraControllerRegisters.DI0_MODE", reply)
 
-        return DI0ModeConfig(reply.payload)
+        if reply is not None:
+            return DI0ModeConfig(reply.payload)
+      
+        return None
 
-    def write_di0_mode(self, value: DI0ModeConfig) -> ReplyHarpMessage | None:
+    def write_di0_mode(self, value: DI0ModeConfig) -> HarpMessage | None:
         """
         Writes a value to the DI0Mode register.
 
@@ -620,29 +665,32 @@ class CameraController(Device):
             Value to write to the DI0Mode register.
         """
         address = CameraControllerRegisters.DI0_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DI0Mode")
+            raise HarpWriteException("CameraControllerRegisters.DI0_MODE", reply)
 
         return reply
 
-    def read_control0_mode(self) -> ControlModeConfig:
+    def read_control0_mode(self) -> ControlModeConfig | None:
         """
         Reads the contents of the Control0Mode register.
 
         Returns
         -------
-        ControlModeConfig
+        ControlModeConfig | None
             Value read from the Control0Mode register.
         """
         address = CameraControllerRegisters.CONTROL0_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Control0Mode")
+            raise HarpReadException("CameraControllerRegisters.CONTROL0_MODE", reply)
 
-        return ControlModeConfig(reply.payload)
+        if reply is not None:
+            return ControlModeConfig(reply.payload)
+      
+        return None
 
-    def write_control0_mode(self, value: ControlModeConfig) -> ReplyHarpMessage | None:
+    def write_control0_mode(self, value: ControlModeConfig) -> HarpMessage | None:
         """
         Writes a value to the Control0Mode register.
 
@@ -652,30 +700,33 @@ class CameraController(Device):
             Value to write to the Control0Mode register.
         """
         address = CameraControllerRegisters.CONTROL0_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Control0Mode")
+            raise HarpWriteException("CameraControllerRegisters.CONTROL0_MODE", reply)
 
         return reply
 
-    def read_camera0_frequency(self) -> int:
+    def read_camera0_frequency(self) -> int | None:
         """
         Reads the contents of the Camera0Frequency register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Camera0Frequency register.
         """
         address = CameraControllerRegisters.CAMERA0_FREQUENCY
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Camera0Frequency")
+            raise HarpReadException("CameraControllerRegisters.CAMERA0_FREQUENCY", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_camera0_frequency(self, value: int) -> ReplyHarpMessage | None:
+    def write_camera0_frequency(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Camera0Frequency register.
 
@@ -685,30 +736,33 @@ class CameraController(Device):
             Value to write to the Camera0Frequency register.
         """
         address = CameraControllerRegisters.CAMERA0_FREQUENCY
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Camera0Frequency")
+            raise HarpWriteException("CameraControllerRegisters.CAMERA0_FREQUENCY", reply)
 
         return reply
 
-    def read_servo0_period(self) -> int:
+    def read_servo0_period(self) -> int | None:
         """
         Reads the contents of the Servo0Period register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Servo0Period register.
         """
         address = CameraControllerRegisters.SERVO0_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Servo0Period")
+            raise HarpReadException("CameraControllerRegisters.SERVO0_PERIOD", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_servo0_period(self, value: int) -> ReplyHarpMessage | None:
+    def write_servo0_period(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Servo0Period register.
 
@@ -718,30 +772,33 @@ class CameraController(Device):
             Value to write to the Servo0Period register.
         """
         address = CameraControllerRegisters.SERVO0_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Servo0Period")
+            raise HarpWriteException("CameraControllerRegisters.SERVO0_PERIOD", reply)
 
         return reply
 
-    def read_servo0_pulse_width(self) -> int:
+    def read_servo0_pulse_width(self) -> int | None:
         """
         Reads the contents of the Servo0PulseWidth register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Servo0PulseWidth register.
         """
         address = CameraControllerRegisters.SERVO0_PULSE_WIDTH
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Servo0PulseWidth")
+            raise HarpReadException("CameraControllerRegisters.SERVO0_PULSE_WIDTH", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_servo0_pulse_width(self, value: int) -> ReplyHarpMessage | None:
+    def write_servo0_pulse_width(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Servo0PulseWidth register.
 
@@ -751,29 +808,32 @@ class CameraController(Device):
             Value to write to the Servo0PulseWidth register.
         """
         address = CameraControllerRegisters.SERVO0_PULSE_WIDTH
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Servo0PulseWidth")
+            raise HarpWriteException("CameraControllerRegisters.SERVO0_PULSE_WIDTH", reply)
 
         return reply
 
-    def read_control1_mode(self) -> ControlModeConfig:
+    def read_control1_mode(self) -> ControlModeConfig | None:
         """
         Reads the contents of the Control1Mode register.
 
         Returns
         -------
-        ControlModeConfig
+        ControlModeConfig | None
             Value read from the Control1Mode register.
         """
         address = CameraControllerRegisters.CONTROL1_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Control1Mode")
+            raise HarpReadException("CameraControllerRegisters.CONTROL1_MODE", reply)
 
-        return ControlModeConfig(reply.payload)
+        if reply is not None:
+            return ControlModeConfig(reply.payload)
+      
+        return None
 
-    def write_control1_mode(self, value: ControlModeConfig) -> ReplyHarpMessage | None:
+    def write_control1_mode(self, value: ControlModeConfig) -> HarpMessage | None:
         """
         Writes a value to the Control1Mode register.
 
@@ -783,30 +843,33 @@ class CameraController(Device):
             Value to write to the Control1Mode register.
         """
         address = CameraControllerRegisters.CONTROL1_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Control1Mode")
+            raise HarpWriteException("CameraControllerRegisters.CONTROL1_MODE", reply)
 
         return reply
 
-    def read_camera1_frequency(self) -> int:
+    def read_camera1_frequency(self) -> int | None:
         """
         Reads the contents of the Camera1Frequency register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Camera1Frequency register.
         """
         address = CameraControllerRegisters.CAMERA1_FREQUENCY
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Camera1Frequency")
+            raise HarpReadException("CameraControllerRegisters.CAMERA1_FREQUENCY", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_camera1_frequency(self, value: int) -> ReplyHarpMessage | None:
+    def write_camera1_frequency(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Camera1Frequency register.
 
@@ -816,30 +879,33 @@ class CameraController(Device):
             Value to write to the Camera1Frequency register.
         """
         address = CameraControllerRegisters.CAMERA1_FREQUENCY
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Camera1Frequency")
+            raise HarpWriteException("CameraControllerRegisters.CAMERA1_FREQUENCY", reply)
 
         return reply
 
-    def read_servo1_period(self) -> int:
+    def read_servo1_period(self) -> int | None:
         """
         Reads the contents of the Servo1Period register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Servo1Period register.
         """
         address = CameraControllerRegisters.SERVO1_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Servo1Period")
+            raise HarpReadException("CameraControllerRegisters.SERVO1_PERIOD", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_servo1_period(self, value: int) -> ReplyHarpMessage | None:
+    def write_servo1_period(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Servo1Period register.
 
@@ -849,30 +915,33 @@ class CameraController(Device):
             Value to write to the Servo1Period register.
         """
         address = CameraControllerRegisters.SERVO1_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Servo1Period")
+            raise HarpWriteException("CameraControllerRegisters.SERVO1_PERIOD", reply)
 
         return reply
 
-    def read_servo1_pulse_width(self) -> int:
+    def read_servo1_pulse_width(self) -> int | None:
         """
         Reads the contents of the Servo1PulseWidth register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Servo1PulseWidth register.
         """
         address = CameraControllerRegisters.SERVO1_PULSE_WIDTH
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Servo1PulseWidth")
+            raise HarpReadException("CameraControllerRegisters.SERVO1_PULSE_WIDTH", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_servo1_pulse_width(self, value: int) -> ReplyHarpMessage | None:
+    def write_servo1_pulse_width(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Servo1PulseWidth register.
 
@@ -882,29 +951,32 @@ class CameraController(Device):
             Value to write to the Servo1PulseWidth register.
         """
         address = CameraControllerRegisters.SERVO1_PULSE_WIDTH
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Servo1PulseWidth")
+            raise HarpWriteException("CameraControllerRegisters.SERVO1_PULSE_WIDTH", reply)
 
         return reply
 
-    def read_enable_events(self) -> CameraControllerEvents:
+    def read_enable_events(self) -> CameraControllerEvents | None:
         """
         Reads the contents of the EnableEvents register.
 
         Returns
         -------
-        CameraControllerEvents
+        CameraControllerEvents | None
             Value read from the EnableEvents register.
         """
         address = CameraControllerRegisters.ENABLE_EVENTS
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EnableEvents")
+            raise HarpReadException("CameraControllerRegisters.ENABLE_EVENTS", reply)
 
-        return CameraControllerEvents(reply.payload)
+        if reply is not None:
+            return CameraControllerEvents(reply.payload)
+      
+        return None
 
-    def write_enable_events(self, value: CameraControllerEvents) -> ReplyHarpMessage | None:
+    def write_enable_events(self, value: CameraControllerEvents) -> HarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -914,9 +986,9 @@ class CameraController(Device):
             Value to write to the EnableEvents register.
         """
         address = CameraControllerRegisters.ENABLE_EVENTS
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EnableEvents")
+            raise HarpWriteException("CameraControllerRegisters.ENABLE_EVENTS", reply)
 
         return reply
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 
 from harp.protocol import MessageType, PayloadType
-from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.protocol.exceptions import HarpException, HarpReadException, HarpWriteException
+from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
 
@@ -183,41 +183,47 @@ class Synchronizer(Device):
         # verify that WHO_AM_I matches the expected value
         if self.WHO_AM_I != 1104:
             self.disconnect()
-            raise Exception(f"WHO_AM_I mismatch: expected {1104}, got {self.WHO_AM_I}")
+            raise HarpException(f"WHO_AM_I mismatch: expected {1104}, got {self.WHO_AM_I}")
 
-    def read_digital_input_state(self) -> DigitalInputs:
+    def read_digital_input_state(self) -> DigitalInputs | None:
         """
         Reads the contents of the DigitalInputState register.
 
         Returns
         -------
-        DigitalInputs
+        DigitalInputs | None
             Value read from the DigitalInputState register.
         """
         address = SynchronizerRegisters.DIGITAL_INPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalInputState")
+            raise HarpReadException("SynchronizerRegisters.DIGITAL_INPUT_STATE", reply)
 
-        return DigitalInputs(reply.payload)
+        if reply is not None:
+            return DigitalInputs(reply.payload)
+      
+        return None
 
-    def read_digital_output_state(self) -> DigitalOutputs:
+    def read_digital_output_state(self) -> DigitalOutputs | None:
         """
         Reads the contents of the DigitalOutputState register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the DigitalOutputState register.
         """
         address = SynchronizerRegisters.DIGITAL_OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalOutputState")
+            raise HarpReadException("SynchronizerRegisters.DIGITAL_OUTPUT_STATE", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_digital_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_digital_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the DigitalOutputState register.
 
@@ -227,29 +233,32 @@ class Synchronizer(Device):
             Value to write to the DigitalOutputState register.
         """
         address = SynchronizerRegisters.DIGITAL_OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DigitalOutputState")
+            raise HarpWriteException("SynchronizerRegisters.DIGITAL_OUTPUT_STATE", reply)
 
         return reply
 
-    def read_digital_inputs_sampling_mode(self) -> DigitalInputsSamplingConfig:
+    def read_digital_inputs_sampling_mode(self) -> DigitalInputsSamplingConfig | None:
         """
         Reads the contents of the DigitalInputsSamplingMode register.
 
         Returns
         -------
-        DigitalInputsSamplingConfig
+        DigitalInputsSamplingConfig | None
             Value read from the DigitalInputsSamplingMode register.
         """
         address = SynchronizerRegisters.DIGITAL_INPUTS_SAMPLING_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalInputsSamplingMode")
+            raise HarpReadException("SynchronizerRegisters.DIGITAL_INPUTS_SAMPLING_MODE", reply)
 
-        return DigitalInputsSamplingConfig(reply.payload)
+        if reply is not None:
+            return DigitalInputsSamplingConfig(reply.payload)
+      
+        return None
 
-    def write_digital_inputs_sampling_mode(self, value: DigitalInputsSamplingConfig) -> ReplyHarpMessage | None:
+    def write_digital_inputs_sampling_mode(self, value: DigitalInputsSamplingConfig) -> HarpMessage | None:
         """
         Writes a value to the DigitalInputsSamplingMode register.
 
@@ -259,29 +268,32 @@ class Synchronizer(Device):
             Value to write to the DigitalInputsSamplingMode register.
         """
         address = SynchronizerRegisters.DIGITAL_INPUTS_SAMPLING_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DigitalInputsSamplingMode")
+            raise HarpWriteException("SynchronizerRegisters.DIGITAL_INPUTS_SAMPLING_MODE", reply)
 
         return reply
 
-    def read_do0_config(self) -> DO0ConfigMode:
+    def read_do0_config(self) -> DO0ConfigMode | None:
         """
         Reads the contents of the DO0Config register.
 
         Returns
         -------
-        DO0ConfigMode
+        DO0ConfigMode | None
             Value read from the DO0Config register.
         """
         address = SynchronizerRegisters.DO0_CONFIG
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DO0Config")
+            raise HarpReadException("SynchronizerRegisters.DO0_CONFIG", reply)
 
-        return DO0ConfigMode(reply.payload)
+        if reply is not None:
+            return DO0ConfigMode(reply.payload)
+      
+        return None
 
-    def write_do0_config(self, value: DO0ConfigMode) -> ReplyHarpMessage | None:
+    def write_do0_config(self, value: DO0ConfigMode) -> HarpMessage | None:
         """
         Writes a value to the DO0Config register.
 
@@ -291,29 +303,32 @@ class Synchronizer(Device):
             Value to write to the DO0Config register.
         """
         address = SynchronizerRegisters.DO0_CONFIG
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DO0Config")
+            raise HarpWriteException("SynchronizerRegisters.DO0_CONFIG", reply)
 
         return reply
 
-    def read_enable_events(self) -> SynchronizerEvents:
+    def read_enable_events(self) -> SynchronizerEvents | None:
         """
         Reads the contents of the EnableEvents register.
 
         Returns
         -------
-        SynchronizerEvents
+        SynchronizerEvents | None
             Value read from the EnableEvents register.
         """
         address = SynchronizerRegisters.ENABLE_EVENTS
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EnableEvents")
+            raise HarpReadException("SynchronizerRegisters.ENABLE_EVENTS", reply)
 
-        return SynchronizerEvents(reply.payload)
+        if reply is not None:
+            return SynchronizerEvents(reply.payload)
+      
+        return None
 
-    def write_enable_events(self, value: SynchronizerEvents) -> ReplyHarpMessage | None:
+    def write_enable_events(self, value: SynchronizerEvents) -> HarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -323,9 +338,9 @@ class Synchronizer(Device):
             Value to write to the EnableEvents register.
         """
         address = SynchronizerRegisters.ENABLE_EVENTS
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EnableEvents")
+            raise HarpWriteException("SynchronizerRegisters.ENABLE_EVENTS", reply)
 
         return reply
 

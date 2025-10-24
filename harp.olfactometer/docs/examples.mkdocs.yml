@@ -1,0 +1,7 @@
+site_name: Olfactometer
+docs_dir: .
+
+nav:
+  - Index: examples/index.md
+  - Odor Valve Toggle: examples/odor_valve_toggle/odor_valve_toggle.md
+  # _Add additional example markdown files here_

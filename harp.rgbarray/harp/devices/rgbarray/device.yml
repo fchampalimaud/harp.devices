@@ -116,11 +116,11 @@ bitMasks:
       DI0: 0x1
   DigitalOutputs:
     bits:
-      DO0: {0x1, description: "Digital Output 0"}
-      DO1: {0x2, description: "Digital Output 1"}
-      DO2: {0x4, description: "Digital Output 2"}
-      DO3: {0x8, description: "Digital Output 3"}
-      DO4: {0x16, description: "Digital Output 4"}
+      DO0: 0x1
+      DO1: 0x2
+      DO2: 0x4
+      DO3: 0x8
+      DO4: 0x16
 groupMasks:
   DI0ModeConfig:
     description: Specifies the operation mode of the DI0 pin.

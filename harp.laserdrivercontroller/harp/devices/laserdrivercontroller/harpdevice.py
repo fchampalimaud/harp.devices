@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 
 from harp.protocol import MessageType, PayloadType
-from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.protocol.exceptions import HarpException, HarpReadException, HarpWriteException
+from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
 
@@ -202,26 +202,29 @@ class LaserDriverController(Device):
         # verify that WHO_AM_I matches the expected value
         if self.WHO_AM_I != 1298:
             self.disconnect()
-            raise Exception(f"WHO_AM_I mismatch: expected {1298}, got {self.WHO_AM_I}")
+            raise HarpException(f"WHO_AM_I mismatch: expected {1298}, got {self.WHO_AM_I}")
 
-    def read_spad_switch(self) -> int:
+    def read_spad_switch(self) -> int | None:
         """
         Reads the contents of the SpadSwitch register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SpadSwitch register.
         """
         address = LaserDriverControllerRegisters.SPAD_SWITCH
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SpadSwitch")
+            raise HarpReadException("LaserDriverControllerRegisters.SPAD_SWITCH", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_spad_switch(self, value: int) -> ReplyHarpMessage | None:
+    def write_spad_switch(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SpadSwitch register.
 
@@ -231,30 +234,33 @@ class LaserDriverController(Device):
             Value to write to the SpadSwitch register.
         """
         address = LaserDriverControllerRegisters.SPAD_SWITCH
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SpadSwitch")
+            raise HarpWriteException("LaserDriverControllerRegisters.SPAD_SWITCH", reply)
 
         return reply
 
-    def read_laser_state(self) -> int:
+    def read_laser_state(self) -> int | None:
         """
         Reads the contents of the LaserState register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the LaserState register.
         """
         address = LaserDriverControllerRegisters.LASER_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("LaserState")
+            raise HarpReadException("LaserDriverControllerRegisters.LASER_STATE", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_laser_state(self, value: int) -> ReplyHarpMessage | None:
+    def write_laser_state(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the LaserState register.
 
@@ -264,29 +270,32 @@ class LaserDriverController(Device):
             Value to write to the LaserState register.
         """
         address = LaserDriverControllerRegisters.LASER_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("LaserState")
+            raise HarpWriteException("LaserDriverControllerRegisters.LASER_STATE", reply)
 
         return reply
 
-    def read_laser_frequency_select(self) -> FrequencySelect:
+    def read_laser_frequency_select(self) -> FrequencySelect | None:
         """
         Reads the contents of the LaserFrequencySelect register.
 
         Returns
         -------
-        FrequencySelect
+        FrequencySelect | None
             Value read from the LaserFrequencySelect register.
         """
         address = LaserDriverControllerRegisters.LASER_FREQUENCY_SELECT
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("LaserFrequencySelect")
+            raise HarpReadException("LaserDriverControllerRegisters.LASER_FREQUENCY_SELECT", reply)
 
-        return FrequencySelect(reply.payload)
+        if reply is not None:
+            return FrequencySelect(reply.payload)
+      
+        return None
 
-    def write_laser_frequency_select(self, value: FrequencySelect) -> ReplyHarpMessage | None:
+    def write_laser_frequency_select(self, value: FrequencySelect) -> HarpMessage | None:
         """
         Writes a value to the LaserFrequencySelect register.
 
@@ -296,30 +305,33 @@ class LaserDriverController(Device):
             Value to write to the LaserFrequencySelect register.
         """
         address = LaserDriverControllerRegisters.LASER_FREQUENCY_SELECT
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("LaserFrequencySelect")
+            raise HarpWriteException("LaserDriverControllerRegisters.LASER_FREQUENCY_SELECT", reply)
 
         return reply
 
-    def read_laser_intensity(self) -> int:
+    def read_laser_intensity(self) -> int | None:
         """
         Reads the contents of the LaserIntensity register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the LaserIntensity register.
         """
         address = LaserDriverControllerRegisters.LASER_INTENSITY
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("LaserIntensity")
+            raise HarpReadException("LaserDriverControllerRegisters.LASER_INTENSITY", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_laser_intensity(self, value: int) -> ReplyHarpMessage | None:
+    def write_laser_intensity(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the LaserIntensity register.
 
@@ -329,29 +341,32 @@ class LaserDriverController(Device):
             Value to write to the LaserIntensity register.
         """
         address = LaserDriverControllerRegisters.LASER_INTENSITY
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("LaserIntensity")
+            raise HarpWriteException("LaserDriverControllerRegisters.LASER_INTENSITY", reply)
 
         return reply
 
-    def read_output_set(self) -> DigitalOutputs:
+    def read_output_set(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputSet register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputSet register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputSet")
+            raise HarpReadException("LaserDriverControllerRegisters.OUTPUT_SET", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputSet register.
 
@@ -361,29 +376,32 @@ class LaserDriverController(Device):
             Value to write to the OutputSet register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputSet")
+            raise HarpWriteException("LaserDriverControllerRegisters.OUTPUT_SET", reply)
 
         return reply
 
-    def read_output_clear(self) -> DigitalOutputs:
+    def read_output_clear(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputClear register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputClear register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputClear")
+            raise HarpReadException("LaserDriverControllerRegisters.OUTPUT_CLEAR", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputClear register.
 
@@ -393,29 +411,32 @@ class LaserDriverController(Device):
             Value to write to the OutputClear register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputClear")
+            raise HarpWriteException("LaserDriverControllerRegisters.OUTPUT_CLEAR", reply)
 
         return reply
 
-    def read_output_toggle(self) -> DigitalOutputs:
+    def read_output_toggle(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputToggle register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputToggle register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_TOGGLE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputToggle")
+            raise HarpReadException("LaserDriverControllerRegisters.OUTPUT_TOGGLE", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_toggle(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputToggle register.
 
@@ -425,29 +446,32 @@ class LaserDriverController(Device):
             Value to write to the OutputToggle register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_TOGGLE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputToggle")
+            raise HarpWriteException("LaserDriverControllerRegisters.OUTPUT_TOGGLE", reply)
 
         return reply
 
-    def read_output_state(self) -> DigitalOutputs:
+    def read_output_state(self) -> DigitalOutputs | None:
         """
         Reads the contents of the OutputState register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the OutputState register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("OutputState")
+            raise HarpReadException("LaserDriverControllerRegisters.OUTPUT_STATE", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_output_state(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the OutputState register.
 
@@ -457,29 +481,32 @@ class LaserDriverController(Device):
             Value to write to the OutputState register.
         """
         address = LaserDriverControllerRegisters.OUTPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("OutputState")
+            raise HarpWriteException("LaserDriverControllerRegisters.OUTPUT_STATE", reply)
 
         return reply
 
-    def read_bncs_state(self) -> Bncs:
+    def read_bncs_state(self) -> Bncs | None:
         """
         Reads the contents of the BncsState register.
 
         Returns
         -------
-        Bncs
+        Bncs | None
             Value read from the BncsState register.
         """
         address = LaserDriverControllerRegisters.BNCS_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("BncsState")
+            raise HarpReadException("LaserDriverControllerRegisters.BNCS_STATE", reply)
 
-        return Bncs(reply.payload)
+        if reply is not None:
+            return Bncs(reply.payload)
+      
+        return None
 
-    def write_bncs_state(self, value: Bncs) -> ReplyHarpMessage | None:
+    def write_bncs_state(self, value: Bncs) -> HarpMessage | None:
         """
         Writes a value to the BncsState register.
 
@@ -489,29 +516,32 @@ class LaserDriverController(Device):
             Value to write to the BncsState register.
         """
         address = LaserDriverControllerRegisters.BNCS_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("BncsState")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNCS_STATE", reply)
 
         return reply
 
-    def read_signal_state(self) -> Signals:
+    def read_signal_state(self) -> Signals | None:
         """
         Reads the contents of the SignalState register.
 
         Returns
         -------
-        Signals
+        Signals | None
             Value read from the SignalState register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalState")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_STATE", reply)
 
-        return Signals(reply.payload)
+        if reply is not None:
+            return Signals(reply.payload)
+      
+        return None
 
-    def write_signal_state(self, value: Signals) -> ReplyHarpMessage | None:
+    def write_signal_state(self, value: Signals) -> HarpMessage | None:
         """
         Writes a value to the SignalState register.
 
@@ -521,30 +551,33 @@ class LaserDriverController(Device):
             Value to write to the SignalState register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_STATE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalState")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_STATE", reply)
 
         return reply
 
-    def read_bnc1_on(self) -> int:
+    def read_bnc1_on(self) -> int | None:
         """
         Reads the contents of the Bnc1On register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc1On register.
         """
         address = LaserDriverControllerRegisters.BNC1_ON
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc1On")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC1_ON", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc1_on(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc1_on(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc1On register.
 
@@ -554,30 +587,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc1On register.
         """
         address = LaserDriverControllerRegisters.BNC1_ON
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc1On")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC1_ON", reply)
 
         return reply
 
-    def read_bnc1_off(self) -> int:
+    def read_bnc1_off(self) -> int | None:
         """
         Reads the contents of the Bnc1Off register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc1Off register.
         """
         address = LaserDriverControllerRegisters.BNC1_OFF
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc1Off")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC1_OFF", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc1_off(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc1_off(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc1Off register.
 
@@ -587,30 +623,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc1Off register.
         """
         address = LaserDriverControllerRegisters.BNC1_OFF
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc1Off")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC1_OFF", reply)
 
         return reply
 
-    def read_bnc1_pulses(self) -> int:
+    def read_bnc1_pulses(self) -> int | None:
         """
         Reads the contents of the Bnc1Pulses register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc1Pulses register.
         """
         address = LaserDriverControllerRegisters.BNC1_PULSES
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc1Pulses")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC1_PULSES", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc1_pulses(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc1_pulses(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc1Pulses register.
 
@@ -620,30 +659,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc1Pulses register.
         """
         address = LaserDriverControllerRegisters.BNC1_PULSES
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc1Pulses")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC1_PULSES", reply)
 
         return reply
 
-    def read_bnc1_tail(self) -> int:
+    def read_bnc1_tail(self) -> int | None:
         """
         Reads the contents of the Bnc1Tail register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc1Tail register.
         """
         address = LaserDriverControllerRegisters.BNC1_TAIL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc1Tail")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC1_TAIL", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc1_tail(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc1_tail(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc1Tail register.
 
@@ -653,30 +695,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc1Tail register.
         """
         address = LaserDriverControllerRegisters.BNC1_TAIL
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc1Tail")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC1_TAIL", reply)
 
         return reply
 
-    def read_bnc2_on(self) -> int:
+    def read_bnc2_on(self) -> int | None:
         """
         Reads the contents of the Bnc2On register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc2On register.
         """
         address = LaserDriverControllerRegisters.BNC2_ON
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc2On")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC2_ON", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc2_on(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc2_on(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc2On register.
 
@@ -686,30 +731,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc2On register.
         """
         address = LaserDriverControllerRegisters.BNC2_ON
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc2On")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC2_ON", reply)
 
         return reply
 
-    def read_bnc2_off(self) -> int:
+    def read_bnc2_off(self) -> int | None:
         """
         Reads the contents of the Bnc2Off register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc2Off register.
         """
         address = LaserDriverControllerRegisters.BNC2_OFF
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc2Off")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC2_OFF", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc2_off(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc2_off(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc2Off register.
 
@@ -719,30 +767,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc2Off register.
         """
         address = LaserDriverControllerRegisters.BNC2_OFF
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc2Off")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC2_OFF", reply)
 
         return reply
 
-    def read_bnc2_pulses(self) -> int:
+    def read_bnc2_pulses(self) -> int | None:
         """
         Reads the contents of the Bnc2Pulses register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc2Pulses register.
         """
         address = LaserDriverControllerRegisters.BNC2_PULSES
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc2Pulses")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC2_PULSES", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc2_pulses(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc2_pulses(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc2Pulses register.
 
@@ -752,30 +803,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc2Pulses register.
         """
         address = LaserDriverControllerRegisters.BNC2_PULSES
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc2Pulses")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC2_PULSES", reply)
 
         return reply
 
-    def read_bnc2_tail(self) -> int:
+    def read_bnc2_tail(self) -> int | None:
         """
         Reads the contents of the Bnc2Tail register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the Bnc2Tail register.
         """
         address = LaserDriverControllerRegisters.BNC2_TAIL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Bnc2Tail")
+            raise HarpReadException("LaserDriverControllerRegisters.BNC2_TAIL", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_bnc2_tail(self, value: int) -> ReplyHarpMessage | None:
+    def write_bnc2_tail(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the Bnc2Tail register.
 
@@ -785,30 +839,33 @@ class LaserDriverController(Device):
             Value to write to the Bnc2Tail register.
         """
         address = LaserDriverControllerRegisters.BNC2_TAIL
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Bnc2Tail")
+            raise HarpWriteException("LaserDriverControllerRegisters.BNC2_TAIL", reply)
 
         return reply
 
-    def read_signal_a_on(self) -> int:
+    def read_signal_a_on(self) -> int | None:
         """
         Reads the contents of the SignalAOn register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalAOn register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_ON
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalAOn")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_A_ON", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_a_on(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_a_on(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalAOn register.
 
@@ -818,30 +875,33 @@ class LaserDriverController(Device):
             Value to write to the SignalAOn register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_ON
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalAOn")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_A_ON", reply)
 
         return reply
 
-    def read_signal_a_off(self) -> int:
+    def read_signal_a_off(self) -> int | None:
         """
         Reads the contents of the SignalAOff register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalAOff register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_OFF
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalAOff")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_A_OFF", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_a_off(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_a_off(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalAOff register.
 
@@ -851,30 +911,33 @@ class LaserDriverController(Device):
             Value to write to the SignalAOff register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_OFF
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalAOff")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_A_OFF", reply)
 
         return reply
 
-    def read_signal_a_pulses(self) -> int:
+    def read_signal_a_pulses(self) -> int | None:
         """
         Reads the contents of the SignalAPulses register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalAPulses register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_PULSES
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalAPulses")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_A_PULSES", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_a_pulses(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_a_pulses(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalAPulses register.
 
@@ -884,30 +947,33 @@ class LaserDriverController(Device):
             Value to write to the SignalAPulses register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_PULSES
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalAPulses")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_A_PULSES", reply)
 
         return reply
 
-    def read_signal_a_tail(self) -> int:
+    def read_signal_a_tail(self) -> int | None:
         """
         Reads the contents of the SignalATail register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalATail register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_TAIL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalATail")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_A_TAIL", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_a_tail(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_a_tail(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalATail register.
 
@@ -917,30 +983,33 @@ class LaserDriverController(Device):
             Value to write to the SignalATail register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_A_TAIL
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalATail")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_A_TAIL", reply)
 
         return reply
 
-    def read_signal_b_on(self) -> int:
+    def read_signal_b_on(self) -> int | None:
         """
         Reads the contents of the SignalBOn register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalBOn register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_ON
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalBOn")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_B_ON", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_b_on(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_b_on(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalBOn register.
 
@@ -950,30 +1019,33 @@ class LaserDriverController(Device):
             Value to write to the SignalBOn register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_ON
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalBOn")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_B_ON", reply)
 
         return reply
 
-    def read_signal_b_off(self) -> int:
+    def read_signal_b_off(self) -> int | None:
         """
         Reads the contents of the SignalBOff register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalBOff register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_OFF
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalBOff")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_B_OFF", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_b_off(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_b_off(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalBOff register.
 
@@ -983,30 +1055,33 @@ class LaserDriverController(Device):
             Value to write to the SignalBOff register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_OFF
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalBOff")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_B_OFF", reply)
 
         return reply
 
-    def read_signal_b_pulses(self) -> int:
+    def read_signal_b_pulses(self) -> int | None:
         """
         Reads the contents of the SignalBPulses register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalBPulses register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_PULSES
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalBPulses")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_B_PULSES", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_b_pulses(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_b_pulses(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalBPulses register.
 
@@ -1016,30 +1091,33 @@ class LaserDriverController(Device):
             Value to write to the SignalBPulses register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_PULSES
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalBPulses")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_B_PULSES", reply)
 
         return reply
 
-    def read_signal_b_tail(self) -> int:
+    def read_signal_b_tail(self) -> int | None:
         """
         Reads the contents of the SignalBTail register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the SignalBTail register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_TAIL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("SignalBTail")
+            raise HarpReadException("LaserDriverControllerRegisters.SIGNAL_B_TAIL", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_signal_b_tail(self, value: int) -> ReplyHarpMessage | None:
+    def write_signal_b_tail(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the SignalBTail register.
 
@@ -1049,29 +1127,32 @@ class LaserDriverController(Device):
             Value to write to the SignalBTail register.
         """
         address = LaserDriverControllerRegisters.SIGNAL_B_TAIL
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("SignalBTail")
+            raise HarpWriteException("LaserDriverControllerRegisters.SIGNAL_B_TAIL", reply)
 
         return reply
 
-    def read_event_enable(self) -> LaserDriverControllerEvents:
+    def read_event_enable(self) -> LaserDriverControllerEvents | None:
         """
         Reads the contents of the EventEnable register.
 
         Returns
         -------
-        LaserDriverControllerEvents
+        LaserDriverControllerEvents | None
             Value read from the EventEnable register.
         """
         address = LaserDriverControllerRegisters.EVENT_ENABLE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EventEnable")
+            raise HarpReadException("LaserDriverControllerRegisters.EVENT_ENABLE", reply)
 
-        return LaserDriverControllerEvents(reply.payload)
+        if reply is not None:
+            return LaserDriverControllerEvents(reply.payload)
+      
+        return None
 
-    def write_event_enable(self, value: LaserDriverControllerEvents) -> ReplyHarpMessage | None:
+    def write_event_enable(self, value: LaserDriverControllerEvents) -> HarpMessage | None:
         """
         Writes a value to the EventEnable register.
 
@@ -1081,9 +1162,9 @@ class LaserDriverController(Device):
             Value to write to the EventEnable register.
         """
         address = LaserDriverControllerRegisters.EVENT_ENABLE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EventEnable")
+            raise HarpWriteException("LaserDriverControllerRegisters.EVENT_ENABLE", reply)
 
         return reply
 

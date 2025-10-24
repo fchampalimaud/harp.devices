@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 
 from harp.protocol import MessageType, PayloadType
-from harp.protocol.exceptions import HarpReadException, HarpWriteException
-from harp.protocol.messages import HarpMessage, ReplyHarpMessage
+from harp.protocol.exceptions import HarpException, HarpReadException, HarpWriteException
+from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
 
@@ -352,26 +352,29 @@ class SyringePump(Device):
         # verify that WHO_AM_I matches the expected value
         if self.WHO_AM_I != 1296:
             self.disconnect()
-            raise Exception(f"WHO_AM_I mismatch: expected {1296}, got {self.WHO_AM_I}")
+            raise HarpException(f"WHO_AM_I mismatch: expected {1296}, got {self.WHO_AM_I}")
 
-    def read_enable_motor_driver(self) -> bool:
+    def read_enable_motor_driver(self) -> bool | None:
         """
         Reads the contents of the EnableMotorDriver register.
 
         Returns
         -------
-        bool
+        bool | None
             Value read from the EnableMotorDriver register.
         """
         address = SyringePumpRegisters.ENABLE_MOTOR_DRIVER
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EnableMotorDriver")
+            raise HarpReadException("SyringePumpRegisters.ENABLE_MOTOR_DRIVER", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_enable_motor_driver(self, value: bool) -> ReplyHarpMessage | None:
+    def write_enable_motor_driver(self, value: bool) -> HarpMessage | None:
         """
         Writes a value to the EnableMotorDriver register.
 
@@ -381,30 +384,33 @@ class SyringePump(Device):
             Value to write to the EnableMotorDriver register.
         """
         address = SyringePumpRegisters.ENABLE_MOTOR_DRIVER
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EnableMotorDriver")
+            raise HarpWriteException("SyringePumpRegisters.ENABLE_MOTOR_DRIVER", reply)
 
         return reply
 
-    def read_enable_protocol(self) -> bool:
+    def read_enable_protocol(self) -> bool | None:
         """
         Reads the contents of the EnableProtocol register.
 
         Returns
         -------
-        bool
+        bool | None
             Value read from the EnableProtocol register.
         """
         address = SyringePumpRegisters.ENABLE_PROTOCOL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EnableProtocol")
+            raise HarpReadException("SyringePumpRegisters.ENABLE_PROTOCOL", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_enable_protocol(self, value: bool) -> ReplyHarpMessage | None:
+    def write_enable_protocol(self, value: bool) -> HarpMessage | None:
         """
         Writes a value to the EnableProtocol register.
 
@@ -414,29 +420,32 @@ class SyringePump(Device):
             Value to write to the EnableProtocol register.
         """
         address = SyringePumpRegisters.ENABLE_PROTOCOL
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EnableProtocol")
+            raise HarpWriteException("SyringePumpRegisters.ENABLE_PROTOCOL", reply)
 
         return reply
 
-    def read_step(self) -> StepState:
+    def read_step(self) -> StepState | None:
         """
         Reads the contents of the Step register.
 
         Returns
         -------
-        StepState
+        StepState | None
             Value read from the Step register.
         """
         address = SyringePumpRegisters.STEP
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Step")
+            raise HarpReadException("SyringePumpRegisters.STEP", reply)
 
-        return StepState(reply.payload)
+        if reply is not None:
+            return StepState(reply.payload)
+      
+        return None
 
-    def write_step(self, value: StepState) -> ReplyHarpMessage | None:
+    def write_step(self, value: StepState) -> HarpMessage | None:
         """
         Writes a value to the Step register.
 
@@ -446,29 +455,32 @@ class SyringePump(Device):
             Value to write to the Step register.
         """
         address = SyringePumpRegisters.STEP
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Step")
+            raise HarpWriteException("SyringePumpRegisters.STEP", reply)
 
         return reply
 
-    def read_direction(self) -> DirectionState:
+    def read_direction(self) -> DirectionState | None:
         """
         Reads the contents of the Direction register.
 
         Returns
         -------
-        DirectionState
+        DirectionState | None
             Value read from the Direction register.
         """
         address = SyringePumpRegisters.DIRECTION
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Direction")
+            raise HarpReadException("SyringePumpRegisters.DIRECTION", reply)
 
-        return DirectionState(reply.payload)
+        if reply is not None:
+            return DirectionState(reply.payload)
+      
+        return None
 
-    def write_direction(self, value: DirectionState) -> ReplyHarpMessage | None:
+    def write_direction(self, value: DirectionState) -> HarpMessage | None:
         """
         Writes a value to the Direction register.
 
@@ -478,77 +490,89 @@ class SyringePump(Device):
             Value to write to the Direction register.
         """
         address = SyringePumpRegisters.DIRECTION
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("Direction")
+            raise HarpWriteException("SyringePumpRegisters.DIRECTION", reply)
 
         return reply
 
-    def read_forward_switch(self) -> ForwardSwitchState:
+    def read_forward_switch(self) -> ForwardSwitchState | None:
         """
         Reads the contents of the ForwardSwitch register.
 
         Returns
         -------
-        ForwardSwitchState
+        ForwardSwitchState | None
             Value read from the ForwardSwitch register.
         """
         address = SyringePumpRegisters.FORWARD_SWITCH
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ForwardSwitch")
+            raise HarpReadException("SyringePumpRegisters.FORWARD_SWITCH", reply)
 
-        return ForwardSwitchState(reply.payload)
+        if reply is not None:
+            return ForwardSwitchState(reply.payload)
+      
+        return None
 
-    def read_reverse_switch(self) -> ReverseSwitchState:
+    def read_reverse_switch(self) -> ReverseSwitchState | None:
         """
         Reads the contents of the ReverseSwitch register.
 
         Returns
         -------
-        ReverseSwitchState
+        ReverseSwitchState | None
             Value read from the ReverseSwitch register.
         """
         address = SyringePumpRegisters.REVERSE_SWITCH
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ReverseSwitch")
+            raise HarpReadException("SyringePumpRegisters.REVERSE_SWITCH", reply)
 
-        return ReverseSwitchState(reply.payload)
+        if reply is not None:
+            return ReverseSwitchState(reply.payload)
+      
+        return None
 
-    def read_digital_input_state(self) -> DigitalInputs:
+    def read_digital_input_state(self) -> DigitalInputs | None:
         """
         Reads the contents of the DigitalInputState register.
 
         Returns
         -------
-        DigitalInputs
+        DigitalInputs | None
             Value read from the DigitalInputState register.
         """
         address = SyringePumpRegisters.DIGITAL_INPUT_STATE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalInputState")
+            raise HarpReadException("SyringePumpRegisters.DIGITAL_INPUT_STATE", reply)
 
-        return DigitalInputs(reply.payload)
+        if reply is not None:
+            return DigitalInputs(reply.payload)
+      
+        return None
 
-    def read_digital_output_set(self) -> DigitalOutputs:
+    def read_digital_output_set(self) -> DigitalOutputs | None:
         """
         Reads the contents of the DigitalOutputSet register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the DigitalOutputSet register.
         """
         address = SyringePumpRegisters.DIGITAL_OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalOutputSet")
+            raise HarpReadException("SyringePumpRegisters.DIGITAL_OUTPUT_SET", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_digital_output_set(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_digital_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the DigitalOutputSet register.
 
@@ -558,29 +582,32 @@ class SyringePump(Device):
             Value to write to the DigitalOutputSet register.
         """
         address = SyringePumpRegisters.DIGITAL_OUTPUT_SET
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DigitalOutputSet")
+            raise HarpWriteException("SyringePumpRegisters.DIGITAL_OUTPUT_SET", reply)
 
         return reply
 
-    def read_digital_output_clear(self) -> DigitalOutputs:
+    def read_digital_output_clear(self) -> DigitalOutputs | None:
         """
         Reads the contents of the DigitalOutputClear register.
 
         Returns
         -------
-        DigitalOutputs
+        DigitalOutputs | None
             Value read from the DigitalOutputClear register.
         """
         address = SyringePumpRegisters.DIGITAL_OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DigitalOutputClear")
+            raise HarpReadException("SyringePumpRegisters.DIGITAL_OUTPUT_CLEAR", reply)
 
-        return DigitalOutputs(reply.payload)
+        if reply is not None:
+            return DigitalOutputs(reply.payload)
+      
+        return None
 
-    def write_digital_output_clear(self, value: DigitalOutputs) -> ReplyHarpMessage | None:
+    def write_digital_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
         """
         Writes a value to the DigitalOutputClear register.
 
@@ -590,29 +617,32 @@ class SyringePump(Device):
             Value to write to the DigitalOutputClear register.
         """
         address = SyringePumpRegisters.DIGITAL_OUTPUT_CLEAR
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DigitalOutputClear")
+            raise HarpWriteException("SyringePumpRegisters.DIGITAL_OUTPUT_CLEAR", reply)
 
         return reply
 
-    def read_do0_sync(self) -> DO0SyncConfig:
+    def read_do0_sync(self) -> DO0SyncConfig | None:
         """
         Reads the contents of the DO0Sync register.
 
         Returns
         -------
-        DO0SyncConfig
+        DO0SyncConfig | None
             Value read from the DO0Sync register.
         """
         address = SyringePumpRegisters.DO0_SYNC
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DO0Sync")
+            raise HarpReadException("SyringePumpRegisters.DO0_SYNC", reply)
 
-        return DO0SyncConfig(reply.payload)
+        if reply is not None:
+            return DO0SyncConfig(reply.payload)
+      
+        return None
 
-    def write_do0_sync(self, value: DO0SyncConfig) -> ReplyHarpMessage | None:
+    def write_do0_sync(self, value: DO0SyncConfig) -> HarpMessage | None:
         """
         Writes a value to the DO0Sync register.
 
@@ -622,29 +652,32 @@ class SyringePump(Device):
             Value to write to the DO0Sync register.
         """
         address = SyringePumpRegisters.DO0_SYNC
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DO0Sync")
+            raise HarpWriteException("SyringePumpRegisters.DO0_SYNC", reply)
 
         return reply
 
-    def read_do1_sync(self) -> DO1SyncConfig:
+    def read_do1_sync(self) -> DO1SyncConfig | None:
         """
         Reads the contents of the DO1Sync register.
 
         Returns
         -------
-        DO1SyncConfig
+        DO1SyncConfig | None
             Value read from the DO1Sync register.
         """
         address = SyringePumpRegisters.DO1_SYNC
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DO1Sync")
+            raise HarpReadException("SyringePumpRegisters.DO1_SYNC", reply)
 
-        return DO1SyncConfig(reply.payload)
+        if reply is not None:
+            return DO1SyncConfig(reply.payload)
+      
+        return None
 
-    def write_do1_sync(self, value: DO1SyncConfig) -> ReplyHarpMessage | None:
+    def write_do1_sync(self, value: DO1SyncConfig) -> HarpMessage | None:
         """
         Writes a value to the DO1Sync register.
 
@@ -654,29 +687,32 @@ class SyringePump(Device):
             Value to write to the DO1Sync register.
         """
         address = SyringePumpRegisters.DO1_SYNC
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DO1Sync")
+            raise HarpWriteException("SyringePumpRegisters.DO1_SYNC", reply)
 
         return reply
 
-    def read_di0_trigger(self) -> DI0TriggerConfig:
+    def read_di0_trigger(self) -> DI0TriggerConfig | None:
         """
         Reads the contents of the DI0Trigger register.
 
         Returns
         -------
-        DI0TriggerConfig
+        DI0TriggerConfig | None
             Value read from the DI0Trigger register.
         """
         address = SyringePumpRegisters.DI0_TRIGGER
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("DI0Trigger")
+            raise HarpReadException("SyringePumpRegisters.DI0_TRIGGER", reply)
 
-        return DI0TriggerConfig(reply.payload)
+        if reply is not None:
+            return DI0TriggerConfig(reply.payload)
+      
+        return None
 
-    def write_di0_trigger(self, value: DI0TriggerConfig) -> ReplyHarpMessage | None:
+    def write_di0_trigger(self, value: DI0TriggerConfig) -> HarpMessage | None:
         """
         Writes a value to the DI0Trigger register.
 
@@ -686,29 +722,32 @@ class SyringePump(Device):
             Value to write to the DI0Trigger register.
         """
         address = SyringePumpRegisters.DI0_TRIGGER
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("DI0Trigger")
+            raise HarpWriteException("SyringePumpRegisters.DI0_TRIGGER", reply)
 
         return reply
 
-    def read_step_mode(self) -> StepModeType:
+    def read_step_mode(self) -> StepModeType | None:
         """
         Reads the contents of the StepMode register.
 
         Returns
         -------
-        StepModeType
+        StepModeType | None
             Value read from the StepMode register.
         """
         address = SyringePumpRegisters.STEP_MODE
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("StepMode")
+            raise HarpReadException("SyringePumpRegisters.STEP_MODE", reply)
 
-        return StepModeType(reply.payload)
+        if reply is not None:
+            return StepModeType(reply.payload)
+      
+        return None
 
-    def write_step_mode(self, value: StepModeType) -> ReplyHarpMessage | None:
+    def write_step_mode(self, value: StepModeType) -> HarpMessage | None:
         """
         Writes a value to the StepMode register.
 
@@ -718,30 +757,33 @@ class SyringePump(Device):
             Value to write to the StepMode register.
         """
         address = SyringePumpRegisters.STEP_MODE
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("StepMode")
+            raise HarpWriteException("SyringePumpRegisters.STEP_MODE", reply)
 
         return reply
 
-    def read_protocol_step_count(self) -> int:
+    def read_protocol_step_count(self) -> int | None:
         """
         Reads the contents of the ProtocolStepCount register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the ProtocolStepCount register.
         """
         address = SyringePumpRegisters.PROTOCOL_STEP_COUNT
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ProtocolStepCount")
+            raise HarpReadException("SyringePumpRegisters.PROTOCOL_STEP_COUNT", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_protocol_step_count(self, value: int) -> ReplyHarpMessage | None:
+    def write_protocol_step_count(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the ProtocolStepCount register.
 
@@ -751,30 +793,33 @@ class SyringePump(Device):
             Value to write to the ProtocolStepCount register.
         """
         address = SyringePumpRegisters.PROTOCOL_STEP_COUNT
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("ProtocolStepCount")
+            raise HarpWriteException("SyringePumpRegisters.PROTOCOL_STEP_COUNT", reply)
 
         return reply
 
-    def read_protocol_period(self) -> int:
+    def read_protocol_period(self) -> int | None:
         """
         Reads the contents of the ProtocolPeriod register.
 
         Returns
         -------
-        int
+        int | None
             Value read from the ProtocolPeriod register.
         """
         address = SyringePumpRegisters.PROTOCOL_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U16))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U16, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ProtocolPeriod")
+            raise HarpReadException("SyringePumpRegisters.PROTOCOL_PERIOD", reply)
 
-        # Directly return the payload as it is a primitive type
-        return reply.payload
+        if reply is not None:
+            # Directly return the payload as it is a primitive type
+            return reply.payload
+      
+        return None
 
-    def write_protocol_period(self, value: int) -> ReplyHarpMessage | None:
+    def write_protocol_period(self, value: int) -> HarpMessage | None:
         """
         Writes a value to the ProtocolPeriod register.
 
@@ -784,29 +829,32 @@ class SyringePump(Device):
             Value to write to the ProtocolPeriod register.
         """
         address = SyringePumpRegisters.PROTOCOL_PERIOD
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U16, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U16, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("ProtocolPeriod")
+            raise HarpWriteException("SyringePumpRegisters.PROTOCOL_PERIOD", reply)
 
         return reply
 
-    def read_enable_events(self) -> PumpEvents:
+    def read_enable_events(self) -> PumpEvents | None:
         """
         Reads the contents of the EnableEvents register.
 
         Returns
         -------
-        PumpEvents
+        PumpEvents | None
             Value read from the EnableEvents register.
         """
         address = SyringePumpRegisters.ENABLE_EVENTS
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("EnableEvents")
+            raise HarpReadException("SyringePumpRegisters.ENABLE_EVENTS", reply)
 
-        return PumpEvents(reply.payload)
+        if reply is not None:
+            return PumpEvents(reply.payload)
+      
+        return None
 
-    def write_enable_events(self, value: PumpEvents) -> ReplyHarpMessage | None:
+    def write_enable_events(self, value: PumpEvents) -> HarpMessage | None:
         """
         Writes a value to the EnableEvents register.
 
@@ -816,45 +864,51 @@ class SyringePump(Device):
             Value to write to the EnableEvents register.
         """
         address = SyringePumpRegisters.ENABLE_EVENTS
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("EnableEvents")
+            raise HarpWriteException("SyringePumpRegisters.ENABLE_EVENTS", reply)
 
         return reply
 
-    def read_protocol(self) -> ProtocolState:
+    def read_protocol(self) -> ProtocolState | None:
         """
         Reads the contents of the Protocol register.
 
         Returns
         -------
-        ProtocolState
+        ProtocolState | None
             Value read from the Protocol register.
         """
         address = SyringePumpRegisters.PROTOCOL
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("Protocol")
+            raise HarpReadException("SyringePumpRegisters.PROTOCOL", reply)
 
-        return ProtocolState(reply.payload)
+        if reply is not None:
+            return ProtocolState(reply.payload)
+      
+        return None
 
-    def read_protocol_direction(self) -> ProtocolDirectionState:
+    def read_protocol_direction(self) -> ProtocolDirectionState | None:
         """
         Reads the contents of the ProtocolDirection register.
 
         Returns
         -------
-        ProtocolDirectionState
+        ProtocolDirectionState | None
             Value read from the ProtocolDirection register.
         """
         address = SyringePumpRegisters.PROTOCOL_DIRECTION
-        reply = self.send(HarpMessage.create(MessageType.READ, address, PayloadType.U8))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.U8, address))
         if reply is not None and reply.is_error:
-            raise HarpReadException("ProtocolDirection")
+            raise HarpReadException("SyringePumpRegisters.PROTOCOL_DIRECTION", reply)
 
-        return ProtocolDirectionState(reply.payload)
+        if reply is not None:
+            return ProtocolDirectionState(reply.payload)
+      
+        return None
 
-    def write_protocol_direction(self, value: ProtocolDirectionState) -> ReplyHarpMessage | None:
+    def write_protocol_direction(self, value: ProtocolDirectionState) -> HarpMessage | None:
         """
         Writes a value to the ProtocolDirection register.
 
@@ -864,9 +918,9 @@ class SyringePump(Device):
             Value to write to the ProtocolDirection register.
         """
         address = SyringePumpRegisters.PROTOCOL_DIRECTION
-        reply = self.send(HarpMessage.create(MessageType.WRITE, address, PayloadType.U8, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.U8, address, value))
         if reply is not None and reply.is_error:
-            raise HarpWriteException("ProtocolDirection")
+            raise HarpWriteException("SyringePumpRegisters.PROTOCOL_DIRECTION", reply)
 
         return reply
 
