@@ -3,4 +3,13 @@ docs_dir: .
 
 nav:
   - Index: examples/index.md
+  - Analog Input: examples/analog_input/analog_input.md
+  - Camera Trigger: examples/camera_trigger/camera_trigger.md
+  - Digital Input: examples/digital_input/digital_input.md
+  - Digital Output: examples/digital_output/digital_output.md
+  - Digital Output Pulse: examples/digital_output_pulse/digital_output_pulse.md
+  - LED Toggle: examples/led_toggle/led_toggle.md
+  - PWM Toggle: examples/pwm_toggle/pwm_toggle.md
+  - Quadrature Encoder: examples/quadrature_encoder/quadrature_encoder.md
+  - Servo Motor Control: examples/servo_motor_control/servo_motor_control.md
   # _Add additional example markdown files here_
