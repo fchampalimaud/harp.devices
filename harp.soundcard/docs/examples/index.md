@@ -1,5 +1,5 @@
 # SoundCard Examples
 
-<!-- Here you will find a collection of examples demonstrating how to use the `harp.soundcard` Python package. Each example includes a brief description and the necessary code to get you started. -->
+Here you will find an example demonstrating how to use the `harp.soundcard` Python package.
 
-_No examples are currently available. For suggestions, please open an issue on the GitHub repository._
+- [Play Sound](./soundcard/play_sound/play_sound.md) - play a sound previously saved in the device.

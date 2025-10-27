@@ -3,4 +3,5 @@ docs_dir: .
 
 nav:
   - Index: examples/index.md
+  - Play Sound: examples/soundcard/play_sound/play_sound.md
   # _Add additional example markdown files here_
