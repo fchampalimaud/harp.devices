@@ -6,6 +6,7 @@ from harp.protocol.exceptions import HarpException, HarpReadException, HarpWrite
 from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
+
 @dataclass
 class AnalogDataPayload:
         # The sampled analog input value on ADC0.
@@ -358,7 +359,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_play_sound_or_frequency(self, value: int) -> HarpMessage | None:
@@ -394,7 +394,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_stop(self, value: int) -> HarpMessage | None:
@@ -430,7 +429,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_left(self, value: int) -> HarpMessage | None:
@@ -466,7 +464,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_right(self, value: int) -> HarpMessage | None:
@@ -502,7 +499,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_both(self, value: list[int]) -> HarpMessage | None:
@@ -538,7 +534,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_play_sound_or_freq(self, value: list[int]) -> HarpMessage | None:
@@ -573,7 +568,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_configure_di0(self) -> DigitalInputConfiguration | None:
@@ -592,7 +586,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalInputConfiguration(reply.payload)
-      
         return None
 
     def write_configure_di0(self, value: DigitalInputConfiguration) -> HarpMessage | None:
@@ -627,7 +620,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalInputConfiguration(reply.payload)
-      
         return None
 
     def write_configure_di1(self, value: DigitalInputConfiguration) -> HarpMessage | None:
@@ -662,7 +654,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalInputConfiguration(reply.payload)
-      
         return None
 
     def write_configure_di2(self, value: DigitalInputConfiguration) -> HarpMessage | None:
@@ -698,7 +689,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_sound_index_di0(self, value: int) -> HarpMessage | None:
@@ -734,7 +724,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_sound_index_di1(self, value: int) -> HarpMessage | None:
@@ -770,7 +759,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_sound_index_di2(self, value: int) -> HarpMessage | None:
@@ -806,7 +794,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_frequency_di0(self, value: int) -> HarpMessage | None:
@@ -842,7 +829,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_frequency_di1(self, value: int) -> HarpMessage | None:
@@ -878,7 +864,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_frequency_di2(self, value: int) -> HarpMessage | None:
@@ -914,7 +899,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_left_di0(self, value: int) -> HarpMessage | None:
@@ -950,7 +934,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_left_di1(self, value: int) -> HarpMessage | None:
@@ -986,7 +969,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_left_di2(self, value: int) -> HarpMessage | None:
@@ -1022,7 +1004,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_right_di0(self, value: int) -> HarpMessage | None:
@@ -1058,7 +1039,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_right_di1(self, value: int) -> HarpMessage | None:
@@ -1094,7 +1074,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_right_di2(self, value: int) -> HarpMessage | None:
@@ -1130,7 +1109,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_sound_index_di0(self, value: list[int]) -> HarpMessage | None:
@@ -1166,7 +1144,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_sound_index_di1(self, value: list[int]) -> HarpMessage | None:
@@ -1202,7 +1179,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_sound_index_di2(self, value: list[int]) -> HarpMessage | None:
@@ -1238,7 +1214,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_frequency_di0(self, value: list[int]) -> HarpMessage | None:
@@ -1274,7 +1249,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_frequency_di1(self, value: list[int]) -> HarpMessage | None:
@@ -1310,7 +1284,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_attenuation_and_frequency_di2(self, value: list[int]) -> HarpMessage | None:
@@ -1345,7 +1318,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputConfiguration(reply.payload)
-      
         return None
 
     def write_configure_do0(self, value: DigitalOutputConfiguration) -> HarpMessage | None:
@@ -1380,7 +1352,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputConfiguration(reply.payload)
-      
         return None
 
     def write_configure_do1(self, value: DigitalOutputConfiguration) -> HarpMessage | None:
@@ -1415,7 +1386,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputConfiguration(reply.payload)
-      
         return None
 
     def write_configure_do2(self, value: DigitalOutputConfiguration) -> HarpMessage | None:
@@ -1451,7 +1421,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do0(self, value: int) -> HarpMessage | None:
@@ -1487,7 +1456,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do1(self, value: int) -> HarpMessage | None:
@@ -1523,7 +1491,6 @@ class SoundCard(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do2(self, value: int) -> HarpMessage | None:
@@ -1558,7 +1525,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1593,7 +1559,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1628,7 +1593,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1663,7 +1627,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1698,7 +1661,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return AdcConfiguration(reply.payload)
-      
         return None
 
     def write_configure_adc(self, value: AdcConfiguration) -> HarpMessage | None:
@@ -1741,7 +1703,6 @@ class SoundCard(Device):
                 AttenuationRight=payload[3],
                 Frequency=payload[4]
             )
-      
         return None
 
     def read_commands(self) -> ControllerCommand | None:
@@ -1760,7 +1721,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return ControllerCommand(reply.payload)
-      
         return None
 
     def write_commands(self, value: ControllerCommand) -> HarpMessage | None:
@@ -1795,7 +1755,6 @@ class SoundCard(Device):
 
         if reply is not None:
             return SoundCardEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: SoundCardEvents) -> HarpMessage | None:

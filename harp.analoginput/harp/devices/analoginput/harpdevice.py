@@ -6,6 +6,7 @@ from harp.protocol.exceptions import HarpException, HarpReadException, HarpWrite
 from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
+
 @dataclass
 class AnalogDataPayload:
     Channel0: int
@@ -343,7 +344,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_acquisition_state(self, value: bool) -> HarpMessage | None:
@@ -385,7 +385,6 @@ class AnalogInput(Device):
                 Channel2=payload[2],
                 Channel3=payload[3]
             )
-      
         return None
 
     def read_digital_input_state(self) -> DigitalInputs | None:
@@ -404,7 +403,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_range_and_filter(self) -> RangeAndFilterConfig | None:
@@ -423,7 +421,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return RangeAndFilterConfig(reply.payload)
-      
         return None
 
     def write_range_and_filter(self, value: RangeAndFilterConfig) -> HarpMessage | None:
@@ -458,7 +455,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return SamplingRateMode(reply.payload)
-      
         return None
 
     def write_sampling_rate(self, value: SamplingRateMode) -> HarpMessage | None:
@@ -493,7 +489,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return TriggerConfig(reply.payload)
-      
         return None
 
     def write_di0_trigger(self, value: TriggerConfig) -> HarpMessage | None:
@@ -528,7 +523,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return SyncConfig(reply.payload)
-      
         return None
 
     def write_do0_sync(self, value: SyncConfig) -> HarpMessage | None:
@@ -564,7 +558,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do0_pulse_width(self, value: int) -> HarpMessage | None:
@@ -599,7 +592,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -634,7 +626,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -669,7 +660,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -704,7 +694,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -739,7 +728,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return StartSyncOutputTarget(reply.payload)
-      
         return None
 
     def write_sync_output(self, value: StartSyncOutputTarget) -> HarpMessage | None:
@@ -774,7 +762,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return AdcChannel(reply.payload)
-      
         return None
 
     def write_do0_target_channel(self, value: AdcChannel) -> HarpMessage | None:
@@ -809,7 +796,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return AdcChannel(reply.payload)
-      
         return None
 
     def write_do1_target_channel(self, value: AdcChannel) -> HarpMessage | None:
@@ -844,7 +830,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return AdcChannel(reply.payload)
-      
         return None
 
     def write_do2_target_channel(self, value: AdcChannel) -> HarpMessage | None:
@@ -879,7 +864,6 @@ class AnalogInput(Device):
 
         if reply is not None:
             return AdcChannel(reply.payload)
-      
         return None
 
     def write_do3_target_channel(self, value: AdcChannel) -> HarpMessage | None:
@@ -915,7 +899,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do0_threshold(self, value: int) -> HarpMessage | None:
@@ -951,7 +934,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do1_threshold(self, value: int) -> HarpMessage | None:
@@ -987,7 +969,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do2_threshold(self, value: int) -> HarpMessage | None:
@@ -1023,7 +1004,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do3_threshold(self, value: int) -> HarpMessage | None:
@@ -1059,7 +1039,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do0_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1095,7 +1074,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do1_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1131,7 +1109,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do2_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1167,7 +1144,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do3_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1203,7 +1179,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do0_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -1239,7 +1214,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do1_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -1275,7 +1249,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do2_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -1311,7 +1284,6 @@ class AnalogInput(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do3_time_below_threshold(self, value: int) -> HarpMessage | None:

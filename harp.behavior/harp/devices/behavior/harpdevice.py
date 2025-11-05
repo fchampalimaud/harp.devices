@@ -6,6 +6,7 @@ from harp.protocol.exceptions import HarpException, HarpReadException, HarpWrite
 from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
+
 @dataclass
 class AnalogDataPayload:
         # The voltage at the output of the ADC channel 0.
@@ -14,6 +15,7 @@ class AnalogDataPayload:
     Encoder: int
         # The voltage at the output of the ADC channel 1.
     AnalogInput1: int
+
 
 @dataclass
 class RgbAllPayload:
@@ -29,6 +31,7 @@ class RgbAllPayload:
     Red1: int
         # The intensity of the blue channel in the RGB1 LED.
     Blue1: int
+
 
 @dataclass
 class RgbPayload:
@@ -540,7 +543,6 @@ class Behavior(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_output_set(self) -> DigitalOutputs | None:
@@ -559,7 +561,6 @@ class Behavior(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -594,7 +595,6 @@ class Behavior(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -629,7 +629,6 @@ class Behavior(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -664,7 +663,6 @@ class Behavior(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -699,7 +697,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PortDigitalIOS(reply.payload)
-      
         return None
 
     def write_port_dio_set(self, value: PortDigitalIOS) -> HarpMessage | None:
@@ -734,7 +731,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PortDigitalIOS(reply.payload)
-      
         return None
 
     def write_port_dio_clear(self, value: PortDigitalIOS) -> HarpMessage | None:
@@ -769,7 +765,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PortDigitalIOS(reply.payload)
-      
         return None
 
     def write_port_dio_toggle(self, value: PortDigitalIOS) -> HarpMessage | None:
@@ -804,7 +799,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PortDigitalIOS(reply.payload)
-      
         return None
 
     def write_port_dio_state(self, value: PortDigitalIOS) -> HarpMessage | None:
@@ -839,7 +833,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PortDigitalIOS(reply.payload)
-      
         return None
 
     def write_port_dio_direction(self, value: PortDigitalIOS) -> HarpMessage | None:
@@ -874,7 +867,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PortDigitalIOS(reply.payload)
-      
         return None
 
     def read_analog_data(self) -> AnalogDataPayload | None:
@@ -899,7 +891,6 @@ class Behavior(Device):
                 Encoder=payload[1],
                 AnalogInput1=payload[2]
             )
-      
         return None
 
     def read_output_pulse_enable(self) -> DigitalOutputs | None:
@@ -918,7 +909,6 @@ class Behavior(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_pulse_enable(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -954,7 +944,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do_port0(self, value: int) -> HarpMessage | None:
@@ -990,7 +979,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do_port1(self, value: int) -> HarpMessage | None:
@@ -1026,7 +1014,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do_port2(self, value: int) -> HarpMessage | None:
@@ -1062,7 +1049,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_supply_port0(self, value: int) -> HarpMessage | None:
@@ -1098,7 +1084,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_supply_port1(self, value: int) -> HarpMessage | None:
@@ -1134,7 +1119,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_supply_port2(self, value: int) -> HarpMessage | None:
@@ -1170,7 +1154,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_led0(self, value: int) -> HarpMessage | None:
@@ -1206,7 +1189,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_led1(self, value: int) -> HarpMessage | None:
@@ -1242,7 +1224,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_rgb0(self, value: int) -> HarpMessage | None:
@@ -1278,7 +1259,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_rgb1(self, value: int) -> HarpMessage | None:
@@ -1314,7 +1294,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do0(self, value: int) -> HarpMessage | None:
@@ -1350,7 +1329,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do1(self, value: int) -> HarpMessage | None:
@@ -1386,7 +1364,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do2(self, value: int) -> HarpMessage | None:
@@ -1422,7 +1399,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_do3(self, value: int) -> HarpMessage | None:
@@ -1458,7 +1434,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_frequency_do0(self, value: int) -> HarpMessage | None:
@@ -1494,7 +1469,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_frequency_do1(self, value: int) -> HarpMessage | None:
@@ -1530,7 +1504,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_frequency_do2(self, value: int) -> HarpMessage | None:
@@ -1566,7 +1539,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_frequency_do3(self, value: int) -> HarpMessage | None:
@@ -1602,7 +1574,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_duty_cycle_do0(self, value: int) -> HarpMessage | None:
@@ -1638,7 +1609,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_duty_cycle_do1(self, value: int) -> HarpMessage | None:
@@ -1674,7 +1644,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_duty_cycle_do2(self, value: int) -> HarpMessage | None:
@@ -1710,7 +1679,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pwm_duty_cycle_do3(self, value: int) -> HarpMessage | None:
@@ -1745,7 +1713,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PwmOutputs(reply.payload)
-      
         return None
 
     def write_pwm_start(self, value: PwmOutputs) -> HarpMessage | None:
@@ -1780,7 +1747,6 @@ class Behavior(Device):
 
         if reply is not None:
             return PwmOutputs(reply.payload)
-      
         return None
 
     def write_pwm_stop(self, value: PwmOutputs) -> HarpMessage | None:
@@ -1824,7 +1790,6 @@ class Behavior(Device):
                 Red1=payload[4],
                 Blue1=payload[5]
             )
-      
         return None
 
     def write_rgb_all(self, value: RgbAllPayload) -> HarpMessage | None:
@@ -1865,7 +1830,6 @@ class Behavior(Device):
                 Red=payload[1],
                 Blue=payload[2]
             )
-      
         return None
 
     def write_rgb0(self, value: RgbPayload) -> HarpMessage | None:
@@ -1906,7 +1870,6 @@ class Behavior(Device):
                 Red=payload[1],
                 Blue=payload[2]
             )
-      
         return None
 
     def write_rgb1(self, value: RgbPayload) -> HarpMessage | None:
@@ -1942,7 +1905,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led0_current(self, value: int) -> HarpMessage | None:
@@ -1978,7 +1940,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led1_current(self, value: int) -> HarpMessage | None:
@@ -2014,7 +1975,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led0_max_current(self, value: int) -> HarpMessage | None:
@@ -2050,7 +2010,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led1_max_current(self, value: int) -> HarpMessage | None:
@@ -2085,7 +2044,6 @@ class Behavior(Device):
 
         if reply is not None:
             return Events(reply.payload)
-      
         return None
 
     def write_event_enable(self, value: Events) -> HarpMessage | None:
@@ -2120,7 +2078,6 @@ class Behavior(Device):
 
         if reply is not None:
             return CameraOutputs(reply.payload)
-      
         return None
 
     def write_start_cameras(self, value: CameraOutputs) -> HarpMessage | None:
@@ -2155,7 +2112,6 @@ class Behavior(Device):
 
         if reply is not None:
             return CameraOutputs(reply.payload)
-      
         return None
 
     def write_stop_cameras(self, value: CameraOutputs) -> HarpMessage | None:
@@ -2190,7 +2146,6 @@ class Behavior(Device):
 
         if reply is not None:
             return ServoOutputs(reply.payload)
-      
         return None
 
     def write_enable_servos(self, value: ServoOutputs) -> HarpMessage | None:
@@ -2225,7 +2180,6 @@ class Behavior(Device):
 
         if reply is not None:
             return ServoOutputs(reply.payload)
-      
         return None
 
     def write_disable_servos(self, value: ServoOutputs) -> HarpMessage | None:
@@ -2260,7 +2214,6 @@ class Behavior(Device):
 
         if reply is not None:
             return EncoderInputs(reply.payload)
-      
         return None
 
     def write_enable_encoders(self, value: EncoderInputs) -> HarpMessage | None:
@@ -2295,7 +2248,6 @@ class Behavior(Device):
 
         if reply is not None:
             return EncoderModeConfig(reply.payload)
-      
         return None
 
     def write_encoder_mode(self, value: EncoderModeConfig) -> HarpMessage | None:
@@ -2330,7 +2282,6 @@ class Behavior(Device):
 
         if reply is not None:
             return FrameAcquired(reply.payload)
-      
         return None
 
     def read_camera0_frequency(self) -> int | None:
@@ -2350,7 +2301,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_camera0_frequency(self, value: int) -> HarpMessage | None:
@@ -2385,7 +2335,6 @@ class Behavior(Device):
 
         if reply is not None:
             return FrameAcquired(reply.payload)
-      
         return None
 
     def read_camera1_frequency(self) -> int | None:
@@ -2405,7 +2354,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_camera1_frequency(self, value: int) -> HarpMessage | None:
@@ -2441,7 +2389,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo_motor2_period(self, value: int) -> HarpMessage | None:
@@ -2477,7 +2424,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo_motor2_pulse(self, value: int) -> HarpMessage | None:
@@ -2513,7 +2459,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo_motor3_period(self, value: int) -> HarpMessage | None:
@@ -2549,7 +2494,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo_motor3_pulse(self, value: int) -> HarpMessage | None:
@@ -2584,7 +2528,6 @@ class Behavior(Device):
 
         if reply is not None:
             return EncoderInputs(reply.payload)
-      
         return None
 
     def write_encoder_reset(self, value: EncoderInputs) -> HarpMessage | None:
@@ -2620,7 +2563,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_serial_timestamp(self, value: int) -> HarpMessage | None:
@@ -2655,7 +2597,6 @@ class Behavior(Device):
 
         if reply is not None:
             return MimicOutput(reply.payload)
-      
         return None
 
     def write_mimic_port0_ir(self, value: MimicOutput) -> HarpMessage | None:
@@ -2690,7 +2631,6 @@ class Behavior(Device):
 
         if reply is not None:
             return MimicOutput(reply.payload)
-      
         return None
 
     def write_mimic_port1_ir(self, value: MimicOutput) -> HarpMessage | None:
@@ -2725,7 +2665,6 @@ class Behavior(Device):
 
         if reply is not None:
             return MimicOutput(reply.payload)
-      
         return None
 
     def write_mimic_port2_ir(self, value: MimicOutput) -> HarpMessage | None:
@@ -2760,7 +2699,6 @@ class Behavior(Device):
 
         if reply is not None:
             return MimicOutput(reply.payload)
-      
         return None
 
     def write_mimic_port0_valve(self, value: MimicOutput) -> HarpMessage | None:
@@ -2795,7 +2733,6 @@ class Behavior(Device):
 
         if reply is not None:
             return MimicOutput(reply.payload)
-      
         return None
 
     def write_mimic_port1_valve(self, value: MimicOutput) -> HarpMessage | None:
@@ -2830,7 +2767,6 @@ class Behavior(Device):
 
         if reply is not None:
             return MimicOutput(reply.payload)
-      
         return None
 
     def write_mimic_port2_valve(self, value: MimicOutput) -> HarpMessage | None:
@@ -2866,7 +2802,6 @@ class Behavior(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_poke_input_filter(self, value: int) -> HarpMessage | None:

@@ -217,7 +217,6 @@ class AudioSwitch(Device):
 
         if reply is not None:
             return ControlSource(reply.payload)
-      
         return None
 
     def write_control_mode(self, value: ControlSource) -> HarpMessage | None:
@@ -252,7 +251,6 @@ class AudioSwitch(Device):
 
         if reply is not None:
             return AudioChannels(reply.payload)
-      
         return None
 
     def write_enable_channels(self, value: AudioChannels) -> HarpMessage | None:
@@ -287,7 +285,6 @@ class AudioSwitch(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_do0_state(self) -> bool | None:
@@ -307,7 +304,6 @@ class AudioSwitch(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do0_state(self, value: bool) -> HarpMessage | None:
@@ -342,7 +338,6 @@ class AudioSwitch(Device):
 
         if reply is not None:
             return DI4TriggerConfig(reply.payload)
-      
         return None
 
     def write_di4_trigger(self, value: DI4TriggerConfig) -> HarpMessage | None:
@@ -377,7 +372,6 @@ class AudioSwitch(Device):
 
         if reply is not None:
             return DO0SyncConfig(reply.payload)
-      
         return None
 
     def write_do0_sync(self, value: DO0SyncConfig) -> HarpMessage | None:
@@ -412,7 +406,6 @@ class AudioSwitch(Device):
 
         if reply is not None:
             return AudioSwitchEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: AudioSwitchEvents) -> HarpMessage | None:

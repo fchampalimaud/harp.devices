@@ -8,9 +8,9 @@ In this example, the flows for the different channels are enabled to random flow
 ## Requirements
 This example requires the `harp.olfactometer` package to be installed. You can run one of the following commands to do so:
 ```
-pip install harp.olfactometer==0.1.0a3
+pip install harp.olfactometer==0.1.0a4
 # or (for uv users)
-uv add "harp.olfactometer==0.1.0a3"
+uv add "harp.olfactometer==0.1.0a4"
 ```
 
 ## Code

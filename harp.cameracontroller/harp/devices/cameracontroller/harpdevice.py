@@ -253,7 +253,6 @@ class CameraController(Device):
 
         if reply is not None:
             return Cameras(reply.payload)
-      
         return None
 
     def write_camera_start(self, value: Cameras) -> HarpMessage | None:
@@ -288,7 +287,6 @@ class CameraController(Device):
 
         if reply is not None:
             return Cameras(reply.payload)
-      
         return None
 
     def write_camera_stop(self, value: Cameras) -> HarpMessage | None:
@@ -323,7 +321,6 @@ class CameraController(Device):
 
         if reply is not None:
             return Servos(reply.payload)
-      
         return None
 
     def write_servo_enable(self, value: Servos) -> HarpMessage | None:
@@ -358,7 +355,6 @@ class CameraController(Device):
 
         if reply is not None:
             return Servos(reply.payload)
-      
         return None
 
     def write_servo_disable(self, value: Servos) -> HarpMessage | None:
@@ -393,7 +389,6 @@ class CameraController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -428,7 +423,6 @@ class CameraController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -463,7 +457,6 @@ class CameraController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -498,7 +491,6 @@ class CameraController(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_camera0_trigger(self) -> int | None:
@@ -518,7 +510,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_camera1_trigger(self) -> int | None:
@@ -538,7 +529,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_camera0_sync(self) -> int | None:
@@ -558,7 +548,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_camera1_sync(self) -> int | None:
@@ -578,7 +567,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_servo_state(self) -> Servos | None:
@@ -597,7 +585,6 @@ class CameraController(Device):
 
         if reply is not None:
             return Servos(reply.payload)
-      
         return None
 
     def read_sync_interval(self) -> int | None:
@@ -617,7 +604,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_sync_interval(self, value: int) -> HarpMessage | None:
@@ -652,7 +638,6 @@ class CameraController(Device):
 
         if reply is not None:
             return DI0ModeConfig(reply.payload)
-      
         return None
 
     def write_di0_mode(self, value: DI0ModeConfig) -> HarpMessage | None:
@@ -687,7 +672,6 @@ class CameraController(Device):
 
         if reply is not None:
             return ControlModeConfig(reply.payload)
-      
         return None
 
     def write_control0_mode(self, value: ControlModeConfig) -> HarpMessage | None:
@@ -723,7 +707,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_camera0_frequency(self, value: int) -> HarpMessage | None:
@@ -759,7 +742,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo0_period(self, value: int) -> HarpMessage | None:
@@ -795,7 +777,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo0_pulse_width(self, value: int) -> HarpMessage | None:
@@ -830,7 +811,6 @@ class CameraController(Device):
 
         if reply is not None:
             return ControlModeConfig(reply.payload)
-      
         return None
 
     def write_control1_mode(self, value: ControlModeConfig) -> HarpMessage | None:
@@ -866,7 +846,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_camera1_frequency(self, value: int) -> HarpMessage | None:
@@ -902,7 +881,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo1_period(self, value: int) -> HarpMessage | None:
@@ -938,7 +916,6 @@ class CameraController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_servo1_pulse_width(self, value: int) -> HarpMessage | None:
@@ -973,7 +950,6 @@ class CameraController(Device):
 
         if reply is not None:
             return CameraControllerEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: CameraControllerEvents) -> HarpMessage | None:

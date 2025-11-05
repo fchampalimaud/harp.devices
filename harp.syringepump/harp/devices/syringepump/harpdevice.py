@@ -371,7 +371,6 @@ class SyringePump(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_motor_driver(self, value: bool) -> HarpMessage | None:
@@ -407,7 +406,6 @@ class SyringePump(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_protocol(self, value: bool) -> HarpMessage | None:
@@ -442,7 +440,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return StepState(reply.payload)
-      
         return None
 
     def write_step(self, value: StepState) -> HarpMessage | None:
@@ -477,7 +474,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DirectionState(reply.payload)
-      
         return None
 
     def write_direction(self, value: DirectionState) -> HarpMessage | None:
@@ -512,7 +508,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return ForwardSwitchState(reply.payload)
-      
         return None
 
     def read_reverse_switch(self) -> ReverseSwitchState | None:
@@ -531,7 +526,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return ReverseSwitchState(reply.payload)
-      
         return None
 
     def read_digital_input_state(self) -> DigitalInputs | None:
@@ -550,7 +544,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_digital_output_set(self) -> DigitalOutputs | None:
@@ -569,7 +562,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -604,7 +596,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -639,7 +630,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DO0SyncConfig(reply.payload)
-      
         return None
 
     def write_do0_sync(self, value: DO0SyncConfig) -> HarpMessage | None:
@@ -674,7 +664,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DO1SyncConfig(reply.payload)
-      
         return None
 
     def write_do1_sync(self, value: DO1SyncConfig) -> HarpMessage | None:
@@ -709,7 +698,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return DI0TriggerConfig(reply.payload)
-      
         return None
 
     def write_di0_trigger(self, value: DI0TriggerConfig) -> HarpMessage | None:
@@ -744,7 +732,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return StepModeType(reply.payload)
-      
         return None
 
     def write_step_mode(self, value: StepModeType) -> HarpMessage | None:
@@ -780,7 +767,6 @@ class SyringePump(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_protocol_step_count(self, value: int) -> HarpMessage | None:
@@ -816,7 +802,6 @@ class SyringePump(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_protocol_period(self, value: int) -> HarpMessage | None:
@@ -851,7 +836,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return PumpEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: PumpEvents) -> HarpMessage | None:
@@ -886,7 +870,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return ProtocolState(reply.payload)
-      
         return None
 
     def read_protocol_direction(self) -> ProtocolDirectionState | None:
@@ -905,7 +888,6 @@ class SyringePump(Device):
 
         if reply is not None:
             return ProtocolDirectionState(reply.payload)
-      
         return None
 
     def write_protocol_direction(self, value: ProtocolDirectionState) -> HarpMessage | None:

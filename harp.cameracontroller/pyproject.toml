@@ -1,6 +1,6 @@
 [project]
 name = "harp.cameracontroller"
-version = "0.1.0a3"
+version = "0.1.0a4"
 description = "This is a generated Harp device Python interface that interacts with the Harp protocol."
 authors = [{ name = "Hardware and Software Platform, Champalimaud Foundation", email = "software@research.fchampalimaud.org" }]
 readme = "README.md"

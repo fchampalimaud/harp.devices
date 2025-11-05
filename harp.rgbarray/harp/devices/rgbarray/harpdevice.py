@@ -201,7 +201,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led_status(self, value: int) -> HarpMessage | None:
@@ -237,7 +236,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led_count(self, value: int) -> HarpMessage | None:
@@ -273,7 +271,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_rgb_state(self, value: bytes) -> HarpMessage | None:
@@ -309,7 +306,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_rgb_bus0_state(self, value: bytes) -> HarpMessage | None:
@@ -345,7 +341,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_rgb_bus1_state(self, value: bytes) -> HarpMessage | None:
@@ -381,7 +376,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_rgb_off_state(self, value: bytes) -> HarpMessage | None:
@@ -416,7 +410,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DI0ModeConfig(reply.payload)
-      
         return None
 
     def write_di0_mode(self, value: DI0ModeConfig) -> HarpMessage | None:
@@ -451,7 +444,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DOModeConfig(reply.payload)
-      
         return None
 
     def write_do0_mode(self, value: DOModeConfig) -> HarpMessage | None:
@@ -486,7 +478,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DOModeConfig(reply.payload)
-      
         return None
 
     def write_do1_mode(self, value: DOModeConfig) -> HarpMessage | None:
@@ -522,7 +513,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_latch_on_next_update(self, value: bool) -> HarpMessage | None:
@@ -557,7 +547,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_output_set(self) -> DigitalOutputs | None:
@@ -576,7 +565,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -611,7 +599,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -646,7 +633,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -681,7 +667,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -717,7 +702,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_digital_output_pulse_period(self, value: int) -> HarpMessage | None:
@@ -753,7 +737,6 @@ class RgbArray(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_digital_output_pulse_count(self, value: int) -> HarpMessage | None:
@@ -788,7 +771,6 @@ class RgbArray(Device):
 
         if reply is not None:
             return RgbArrayEvents(reply.payload)
-      
         return None
 
     def write_event_enable(self, value: RgbArrayEvents) -> HarpMessage | None:

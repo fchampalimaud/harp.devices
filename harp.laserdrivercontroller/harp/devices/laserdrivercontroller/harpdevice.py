@@ -221,7 +221,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_spad_switch(self, value: int) -> HarpMessage | None:
@@ -257,7 +256,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_laser_state(self, value: int) -> HarpMessage | None:
@@ -292,7 +290,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return FrequencySelect(reply.payload)
-      
         return None
 
     def write_laser_frequency_select(self, value: FrequencySelect) -> HarpMessage | None:
@@ -328,7 +325,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_laser_intensity(self, value: int) -> HarpMessage | None:
@@ -363,7 +359,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -398,7 +393,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -433,7 +427,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -468,7 +461,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -503,7 +495,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return Bncs(reply.payload)
-      
         return None
 
     def write_bncs_state(self, value: Bncs) -> HarpMessage | None:
@@ -538,7 +529,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return Signals(reply.payload)
-      
         return None
 
     def write_signal_state(self, value: Signals) -> HarpMessage | None:
@@ -574,7 +564,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc1_on(self, value: int) -> HarpMessage | None:
@@ -610,7 +599,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc1_off(self, value: int) -> HarpMessage | None:
@@ -646,7 +634,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc1_pulses(self, value: int) -> HarpMessage | None:
@@ -682,7 +669,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc1_tail(self, value: int) -> HarpMessage | None:
@@ -718,7 +704,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc2_on(self, value: int) -> HarpMessage | None:
@@ -754,7 +739,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc2_off(self, value: int) -> HarpMessage | None:
@@ -790,7 +774,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc2_pulses(self, value: int) -> HarpMessage | None:
@@ -826,7 +809,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_bnc2_tail(self, value: int) -> HarpMessage | None:
@@ -862,7 +844,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_a_on(self, value: int) -> HarpMessage | None:
@@ -898,7 +879,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_a_off(self, value: int) -> HarpMessage | None:
@@ -934,7 +914,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_a_pulses(self, value: int) -> HarpMessage | None:
@@ -970,7 +949,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_a_tail(self, value: int) -> HarpMessage | None:
@@ -1006,7 +984,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_b_on(self, value: int) -> HarpMessage | None:
@@ -1042,7 +1019,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_b_off(self, value: int) -> HarpMessage | None:
@@ -1078,7 +1054,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_b_pulses(self, value: int) -> HarpMessage | None:
@@ -1114,7 +1089,6 @@ class LaserDriverController(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_signal_b_tail(self, value: int) -> HarpMessage | None:
@@ -1149,7 +1123,6 @@ class LaserDriverController(Device):
 
         if reply is not None:
             return LaserDriverControllerEvents(reply.payload)
-      
         return None
 
     def write_event_enable(self, value: LaserDriverControllerEvents) -> HarpMessage | None:

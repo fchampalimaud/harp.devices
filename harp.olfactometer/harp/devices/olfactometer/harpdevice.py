@@ -6,6 +6,7 @@ from harp.protocol.exceptions import HarpException, HarpReadException, HarpWrite
 from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
+
 @dataclass
 class FlowmeterPayload:
     Channel0: int
@@ -13,6 +14,7 @@ class FlowmeterPayload:
     Channel2: int
     Channel3: int
     Channel4: int
+
 
 @dataclass
 class ChannelsTargetFlowPayload:
@@ -516,7 +518,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_flow(self, value: bool) -> HarpMessage | None:
@@ -559,7 +560,6 @@ class Olfactometer(Device):
                 Channel3=payload[3],
                 Channel4=payload[4]
             )
-      
         return None
 
     def read_di0_state(self) -> DigitalState | None:
@@ -578,7 +578,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DigitalState(reply.payload)
-      
         return None
 
     def read_channel0_user_calibration(self) -> list[int] | None:
@@ -598,7 +597,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel0_user_calibration(self, value: list[int]) -> HarpMessage | None:
@@ -634,7 +632,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel1_user_calibration(self, value: list[int]) -> HarpMessage | None:
@@ -670,7 +667,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel2_user_calibration(self, value: list[int]) -> HarpMessage | None:
@@ -706,7 +702,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel3_user_calibration(self, value: list[int]) -> HarpMessage | None:
@@ -742,7 +737,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel4_user_calibration(self, value: list[int]) -> HarpMessage | None:
@@ -778,7 +772,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel3_user_calibration_aux(self, value: list[int]) -> HarpMessage | None:
@@ -814,7 +807,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_user_calibration(self, value: bool) -> HarpMessage | None:
@@ -843,14 +835,13 @@ class Olfactometer(Device):
             Value read from the Channel0TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL0_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL0_TARGET_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel0_target_flow(self, value: float) -> HarpMessage | None:
@@ -863,7 +854,7 @@ class Olfactometer(Device):
             Value to write to the Channel0TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL0_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL0_TARGET_FLOW", reply)
 
@@ -879,14 +870,13 @@ class Olfactometer(Device):
             Value read from the Channel1TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL1_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL1_TARGET_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel1_target_flow(self, value: float) -> HarpMessage | None:
@@ -899,7 +889,7 @@ class Olfactometer(Device):
             Value to write to the Channel1TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL1_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL1_TARGET_FLOW", reply)
 
@@ -915,14 +905,13 @@ class Olfactometer(Device):
             Value read from the Channel2TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL2_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL2_TARGET_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel2_target_flow(self, value: float) -> HarpMessage | None:
@@ -935,7 +924,7 @@ class Olfactometer(Device):
             Value to write to the Channel2TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL2_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL2_TARGET_FLOW", reply)
 
@@ -951,14 +940,13 @@ class Olfactometer(Device):
             Value read from the Channel3TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL3_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL3_TARGET_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel3_target_flow(self, value: float) -> HarpMessage | None:
@@ -971,7 +959,7 @@ class Olfactometer(Device):
             Value to write to the Channel3TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL3_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL3_TARGET_FLOW", reply)
 
@@ -987,14 +975,13 @@ class Olfactometer(Device):
             Value read from the Channel4TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL4_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL4_TARGET_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel4_target_flow(self, value: float) -> HarpMessage | None:
@@ -1007,7 +994,7 @@ class Olfactometer(Device):
             Value to write to the Channel4TargetFlow register.
         """
         address = OlfactometerRegisters.CHANNEL4_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL4_TARGET_FLOW", reply)
 
@@ -1023,7 +1010,7 @@ class Olfactometer(Device):
             Value read from the ChannelsTargetFlow register.
         """
         address = OlfactometerRegisters.CHANNELS_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNELS_TARGET_FLOW", reply)
 
@@ -1037,7 +1024,6 @@ class Olfactometer(Device):
                 Channel3=payload[3],
                 Channel4=payload[4]
             )
-      
         return None
 
     def write_channels_target_flow(self, value: ChannelsTargetFlowPayload) -> HarpMessage | None:
@@ -1050,7 +1036,7 @@ class Olfactometer(Device):
             Value to write to the ChannelsTargetFlow register.
         """
         address = OlfactometerRegisters.CHANNELS_TARGET_FLOW
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNELS_TARGET_FLOW", reply)
 
@@ -1066,14 +1052,13 @@ class Olfactometer(Device):
             Value read from the Channel0ActualFlow register.
         """
         address = OlfactometerRegisters.CHANNEL0_ACTUAL_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL0_ACTUAL_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_channel1_actual_flow(self) -> float | None:
@@ -1086,14 +1071,13 @@ class Olfactometer(Device):
             Value read from the Channel1ActualFlow register.
         """
         address = OlfactometerRegisters.CHANNEL1_ACTUAL_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL1_ACTUAL_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_channel2_actual_flow(self) -> float | None:
@@ -1106,14 +1090,13 @@ class Olfactometer(Device):
             Value read from the Channel2ActualFlow register.
         """
         address = OlfactometerRegisters.CHANNEL2_ACTUAL_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL2_ACTUAL_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_channel3_actual_flow(self) -> float | None:
@@ -1126,14 +1109,13 @@ class Olfactometer(Device):
             Value read from the Channel3ActualFlow register.
         """
         address = OlfactometerRegisters.CHANNEL3_ACTUAL_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL3_ACTUAL_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_channel4_actual_flow(self) -> float | None:
@@ -1146,14 +1128,13 @@ class Olfactometer(Device):
             Value read from the Channel4ActualFlow register.
         """
         address = OlfactometerRegisters.CHANNEL4_ACTUAL_FLOW
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL4_ACTUAL_FLOW", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_channel0_duty_cycle(self) -> float | None:
@@ -1166,14 +1147,13 @@ class Olfactometer(Device):
             Value read from the Channel0DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL0_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL0_DUTY_CYCLE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel0_duty_cycle(self, value: float) -> HarpMessage | None:
@@ -1186,7 +1166,7 @@ class Olfactometer(Device):
             Value to write to the Channel0DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL0_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL0_DUTY_CYCLE", reply)
 
@@ -1202,14 +1182,13 @@ class Olfactometer(Device):
             Value read from the Channel1DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL1_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL1_DUTY_CYCLE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel1_duty_cycle(self, value: float) -> HarpMessage | None:
@@ -1222,7 +1201,7 @@ class Olfactometer(Device):
             Value to write to the Channel1DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL1_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL1_DUTY_CYCLE", reply)
 
@@ -1238,14 +1217,13 @@ class Olfactometer(Device):
             Value read from the Channel2DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL2_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL2_DUTY_CYCLE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel2_duty_cycle(self, value: float) -> HarpMessage | None:
@@ -1258,7 +1236,7 @@ class Olfactometer(Device):
             Value to write to the Channel2DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL2_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL2_DUTY_CYCLE", reply)
 
@@ -1274,14 +1252,13 @@ class Olfactometer(Device):
             Value read from the Channel3DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL3_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL3_DUTY_CYCLE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel3_duty_cycle(self, value: float) -> HarpMessage | None:
@@ -1294,7 +1271,7 @@ class Olfactometer(Device):
             Value to write to the Channel3DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL3_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL3_DUTY_CYCLE", reply)
 
@@ -1310,14 +1287,13 @@ class Olfactometer(Device):
             Value read from the Channel4DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL4_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("OlfactometerRegisters.CHANNEL4_DUTY_CYCLE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_channel4_duty_cycle(self, value: float) -> HarpMessage | None:
@@ -1330,7 +1306,7 @@ class Olfactometer(Device):
             Value to write to the Channel4DutyCycle register.
         """
         address = OlfactometerRegisters.CHANNEL4_DUTY_CYCLE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("OlfactometerRegisters.CHANNEL4_DUTY_CYCLE", reply)
 
@@ -1352,7 +1328,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1387,7 +1362,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1422,7 +1396,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1457,7 +1430,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -1492,7 +1464,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return Valves(reply.payload)
-      
         return None
 
     def write_enable_valve_pulse(self, value: Valves) -> HarpMessage | None:
@@ -1527,7 +1498,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return Valves(reply.payload)
-      
         return None
 
     def write_valve_set(self, value: Valves) -> HarpMessage | None:
@@ -1562,7 +1532,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return Valves(reply.payload)
-      
         return None
 
     def write_valve_clear(self, value: Valves) -> HarpMessage | None:
@@ -1597,7 +1566,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return Valves(reply.payload)
-      
         return None
 
     def write_valve_toggle(self, value: Valves) -> HarpMessage | None:
@@ -1632,7 +1600,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return Valves(reply.payload)
-      
         return None
 
     def write_valve_state(self, value: Valves) -> HarpMessage | None:
@@ -1667,7 +1634,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return OdorValves(reply.payload)
-      
         return None
 
     def write_odor_valve_state(self, value: OdorValves) -> HarpMessage | None:
@@ -1702,7 +1668,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return EndValves(reply.payload)
-      
         return None
 
     def write_end_valve_state(self, value: EndValves) -> HarpMessage | None:
@@ -1737,7 +1702,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return CheckValves(reply.payload)
-      
         return None
 
     def write_check_valve_state(self, value: CheckValves) -> HarpMessage | None:
@@ -1773,7 +1737,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_valve0_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -1809,7 +1772,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_valve1_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -1845,7 +1807,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_valve2_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -1881,7 +1842,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_valve3_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -1917,7 +1877,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_check_valve0_delay_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -1953,7 +1912,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_check_valve1_delay_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -1989,7 +1947,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_check_valve2_delay_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -2025,7 +1982,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_check_valve3_delay_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -2061,7 +2017,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_end_valve0_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -2097,7 +2052,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_end_valve1_pulse_duration(self, value: int) -> HarpMessage | None:
@@ -2132,7 +2086,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DO0SyncConfig(reply.payload)
-      
         return None
 
     def write_do0_sync(self, value: DO0SyncConfig) -> HarpMessage | None:
@@ -2167,7 +2120,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DO1SyncConfig(reply.payload)
-      
         return None
 
     def write_do1_sync(self, value: DO1SyncConfig) -> HarpMessage | None:
@@ -2202,7 +2154,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return DI0TriggerConfig(reply.payload)
-      
         return None
 
     def write_di0_trigger(self, value: DI0TriggerConfig) -> HarpMessage | None:
@@ -2237,7 +2188,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_valve0(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2272,7 +2222,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_valve1(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2307,7 +2256,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_valve2(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2342,7 +2290,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_valve3(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2377,7 +2324,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_check_valve0(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2412,7 +2358,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_check_valve1(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2447,7 +2392,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_check_valve2(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2482,7 +2426,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_check_valve3(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2517,7 +2460,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_end_valve0(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2552,7 +2494,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return MimicOutputs(reply.payload)
-      
         return None
 
     def write_mimic_end_valve1(self, value: MimicOutputs) -> HarpMessage | None:
@@ -2588,7 +2529,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_valve_external_control(self, value: bool) -> HarpMessage | None:
@@ -2623,7 +2563,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return Channel3RangeConfig(reply.payload)
-      
         return None
 
     def write_channel3_range(self, value: Channel3RangeConfig) -> HarpMessage | None:
@@ -2658,7 +2597,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return CheckValves(reply.payload)
-      
         return None
 
     def write_enable_check_valve_sync(self, value: CheckValves) -> HarpMessage | None:
@@ -2694,7 +2632,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def read_enable_temperature_calibration(self) -> bool | None:
@@ -2714,7 +2651,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_enable_temperature_calibration(self, value: bool) -> HarpMessage | None:
@@ -2750,7 +2686,6 @@ class Olfactometer(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_temperature_calibration_value(self, value: int) -> HarpMessage | None:
@@ -2785,7 +2720,6 @@ class Olfactometer(Device):
 
         if reply is not None:
             return OlfactometerEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: OlfactometerEvents) -> HarpMessage | None:

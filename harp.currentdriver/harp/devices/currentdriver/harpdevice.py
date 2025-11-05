@@ -203,7 +203,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_output_set(self) -> DigitalOutputs | None:
@@ -222,7 +221,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -257,7 +255,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -292,7 +289,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -327,7 +323,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -356,14 +351,13 @@ class CurrentDriver(Device):
             Value read from the Led0Current register.
         """
         address = CurrentDriverRegisters.LED0_CURRENT
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("CurrentDriverRegisters.LED0_CURRENT", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led0_current(self, value: float) -> HarpMessage | None:
@@ -376,7 +370,7 @@ class CurrentDriver(Device):
             Value to write to the Led0Current register.
         """
         address = CurrentDriverRegisters.LED0_CURRENT
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("CurrentDriverRegisters.LED0_CURRENT", reply)
 
@@ -392,14 +386,13 @@ class CurrentDriver(Device):
             Value read from the Led1Current register.
         """
         address = CurrentDriverRegisters.LED1_CURRENT
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("CurrentDriverRegisters.LED1_CURRENT", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led1_current(self, value: float) -> HarpMessage | None:
@@ -412,7 +405,7 @@ class CurrentDriver(Device):
             Value to write to the Led1Current register.
         """
         address = CurrentDriverRegisters.LED1_CURRENT
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("CurrentDriverRegisters.LED1_CURRENT", reply)
 
@@ -428,14 +421,13 @@ class CurrentDriver(Device):
             Value read from the Dac0Voltage register.
         """
         address = CurrentDriverRegisters.DAC0_VOLTAGE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("CurrentDriverRegisters.DAC0_VOLTAGE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_dac0_voltage(self, value: float) -> HarpMessage | None:
@@ -448,7 +440,7 @@ class CurrentDriver(Device):
             Value to write to the Dac0Voltage register.
         """
         address = CurrentDriverRegisters.DAC0_VOLTAGE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("CurrentDriverRegisters.DAC0_VOLTAGE", reply)
 
@@ -464,14 +456,13 @@ class CurrentDriver(Device):
             Value read from the Dac1Voltage register.
         """
         address = CurrentDriverRegisters.DAC1_VOLTAGE
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("CurrentDriverRegisters.DAC1_VOLTAGE", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_dac1_voltage(self, value: float) -> HarpMessage | None:
@@ -484,7 +475,7 @@ class CurrentDriver(Device):
             Value to write to the Dac1Voltage register.
         """
         address = CurrentDriverRegisters.DAC1_VOLTAGE
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("CurrentDriverRegisters.DAC1_VOLTAGE", reply)
 
@@ -506,7 +497,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return LedOutputs(reply.payload)
-      
         return None
 
     def write_led_enable(self, value: LedOutputs) -> HarpMessage | None:
@@ -541,7 +531,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return LedOutputs(reply.payload)
-      
         return None
 
     def write_led_disable(self, value: LedOutputs) -> HarpMessage | None:
@@ -576,7 +565,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return LedOutputs(reply.payload)
-      
         return None
 
     def write_led_state(self, value: LedOutputs) -> HarpMessage | None:
@@ -605,14 +593,13 @@ class CurrentDriver(Device):
             Value read from the Led0MaxCurrent register.
         """
         address = CurrentDriverRegisters.LED0_MAX_CURRENT
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("CurrentDriverRegisters.LED0_MAX_CURRENT", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led0_max_current(self, value: float) -> HarpMessage | None:
@@ -625,7 +612,7 @@ class CurrentDriver(Device):
             Value to write to the Led0MaxCurrent register.
         """
         address = CurrentDriverRegisters.LED0_MAX_CURRENT
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("CurrentDriverRegisters.LED0_MAX_CURRENT", reply)
 
@@ -641,14 +628,13 @@ class CurrentDriver(Device):
             Value read from the Led1MaxCurrent register.
         """
         address = CurrentDriverRegisters.LED1_MAX_CURRENT
-        reply = self.send(HarpMessage(MessageType.READ, PayloadType.Float, address))
+        reply = self.send(HarpMessage(MessageType.READ, PayloadType.FLOAT, address))
         if reply is not None and reply.is_error:
             raise HarpReadException("CurrentDriverRegisters.LED1_MAX_CURRENT", reply)
 
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_led1_max_current(self, value: float) -> HarpMessage | None:
@@ -661,7 +647,7 @@ class CurrentDriver(Device):
             Value to write to the Led1MaxCurrent register.
         """
         address = CurrentDriverRegisters.LED1_MAX_CURRENT
-        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.Float, address, value))
+        reply = self.send(HarpMessage(MessageType.WRITE, PayloadType.FLOAT, address, value))
         if reply is not None and reply.is_error:
             raise HarpWriteException("CurrentDriverRegisters.LED1_MAX_CURRENT", reply)
 
@@ -683,7 +669,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return LedOutputs(reply.payload)
-      
         return None
 
     def write_pulse_enable(self, value: LedOutputs) -> HarpMessage | None:
@@ -719,7 +704,6 @@ class CurrentDriver(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_duty_cycle_led0(self, value: int) -> HarpMessage | None:
@@ -755,7 +739,6 @@ class CurrentDriver(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_duty_cycle_led1(self, value: int) -> HarpMessage | None:
@@ -791,7 +774,6 @@ class CurrentDriver(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_frequency_led0(self, value: int) -> HarpMessage | None:
@@ -827,7 +809,6 @@ class CurrentDriver(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_pulse_frequency_led1(self, value: int) -> HarpMessage | None:
@@ -863,7 +844,6 @@ class CurrentDriver(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_ramp_led0(self, value: int) -> HarpMessage | None:
@@ -899,7 +879,6 @@ class CurrentDriver(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_ramp_led1(self, value: int) -> HarpMessage | None:
@@ -934,7 +913,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return LedRamps(reply.payload)
-      
         return None
 
     def write_ramp_config(self, value: LedRamps) -> HarpMessage | None:
@@ -969,7 +947,6 @@ class CurrentDriver(Device):
 
         if reply is not None:
             return CurrentDriverEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: CurrentDriverEvents) -> HarpMessage | None:

@@ -201,7 +201,6 @@ class Synchronizer(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_digital_output_state(self) -> DigitalOutputs | None:
@@ -220,7 +219,6 @@ class Synchronizer(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -255,7 +253,6 @@ class Synchronizer(Device):
 
         if reply is not None:
             return DigitalInputsSamplingConfig(reply.payload)
-      
         return None
 
     def write_digital_inputs_sampling_mode(self, value: DigitalInputsSamplingConfig) -> HarpMessage | None:
@@ -290,7 +287,6 @@ class Synchronizer(Device):
 
         if reply is not None:
             return DO0ConfigMode(reply.payload)
-      
         return None
 
     def write_do0_config(self, value: DO0ConfigMode) -> HarpMessage | None:
@@ -325,7 +321,6 @@ class Synchronizer(Device):
 
         if reply is not None:
             return SynchronizerEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: SynchronizerEvents) -> HarpMessage | None:

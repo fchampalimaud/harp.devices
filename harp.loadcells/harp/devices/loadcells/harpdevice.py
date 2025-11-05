@@ -6,6 +6,7 @@ from harp.protocol.exceptions import HarpException, HarpReadException, HarpWrite
 from harp.protocol.messages import HarpMessage
 from harp.serial import Device
 
+
 @dataclass
 class LoadCellDataPayload:
     Channel0: int
@@ -375,7 +376,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_acquisition_state(self, value: bool) -> HarpMessage | None:
@@ -421,7 +421,6 @@ class LoadCells(Device):
                 Channel6=payload[6],
                 Channel7=payload[7]
             )
-      
         return None
 
     def read_digital_input_state(self) -> DigitalInputs | None:
@@ -440,7 +439,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return DigitalInputs(reply.payload)
-      
         return None
 
     def read_sync_output_state(self) -> SyncOutputs | None:
@@ -459,7 +457,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return SyncOutputs(reply.payload)
-      
         return None
 
     def read_di0_trigger(self) -> TriggerConfig | None:
@@ -478,7 +475,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return TriggerConfig(reply.payload)
-      
         return None
 
     def write_di0_trigger(self, value: TriggerConfig) -> HarpMessage | None:
@@ -513,7 +509,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return SyncConfig(reply.payload)
-      
         return None
 
     def write_do0_sync(self, value: SyncConfig) -> HarpMessage | None:
@@ -549,7 +544,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do0_pulse_width(self, value: int) -> HarpMessage | None:
@@ -584,7 +578,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_set(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -619,7 +612,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_clear(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -654,7 +646,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_toggle(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -689,7 +680,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return DigitalOutputs(reply.payload)
-      
         return None
 
     def write_digital_output_state(self, value: DigitalOutputs) -> HarpMessage | None:
@@ -725,7 +715,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell0(self, value: int) -> HarpMessage | None:
@@ -761,7 +750,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell1(self, value: int) -> HarpMessage | None:
@@ -797,7 +785,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell2(self, value: int) -> HarpMessage | None:
@@ -833,7 +820,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell3(self, value: int) -> HarpMessage | None:
@@ -869,7 +855,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell4(self, value: int) -> HarpMessage | None:
@@ -905,7 +890,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell5(self, value: int) -> HarpMessage | None:
@@ -941,7 +925,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell6(self, value: int) -> HarpMessage | None:
@@ -977,7 +960,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_offset_load_cell7(self, value: int) -> HarpMessage | None:
@@ -1012,7 +994,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do1_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1047,7 +1028,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do2_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1082,7 +1062,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do3_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1117,7 +1096,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do4_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1152,7 +1130,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do5_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1187,7 +1164,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do6_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1222,7 +1198,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do7_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1257,7 +1232,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellChannel(reply.payload)
-      
         return None
 
     def write_do8_target_load_cell(self, value: LoadCellChannel) -> HarpMessage | None:
@@ -1293,7 +1267,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do1_threshold(self, value: int) -> HarpMessage | None:
@@ -1329,7 +1302,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do2_threshold(self, value: int) -> HarpMessage | None:
@@ -1365,7 +1337,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do3_threshold(self, value: int) -> HarpMessage | None:
@@ -1401,7 +1372,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do4_threshold(self, value: int) -> HarpMessage | None:
@@ -1437,7 +1407,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do5_threshold(self, value: int) -> HarpMessage | None:
@@ -1473,7 +1442,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do6_threshold(self, value: int) -> HarpMessage | None:
@@ -1509,7 +1477,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do7_threshold(self, value: int) -> HarpMessage | None:
@@ -1545,7 +1512,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do8_threshold(self, value: int) -> HarpMessage | None:
@@ -1581,7 +1547,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do1_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1617,7 +1582,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do2_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1653,7 +1617,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do3_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1689,7 +1652,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do4_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1725,7 +1687,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do5_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1761,7 +1722,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do6_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1797,7 +1757,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do7_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1833,7 +1792,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do8_time_above_threshold(self, value: int) -> HarpMessage | None:
@@ -1869,7 +1827,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do1_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -1905,7 +1862,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do2_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -1941,7 +1897,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do3_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -1977,7 +1932,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do4_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -2013,7 +1967,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do5_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -2049,7 +2002,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do6_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -2085,7 +2037,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do7_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -2121,7 +2072,6 @@ class LoadCells(Device):
         if reply is not None:
             # Directly return the payload as it is a primitive type
             return reply.payload
-      
         return None
 
     def write_do8_time_below_threshold(self, value: int) -> HarpMessage | None:
@@ -2156,7 +2106,6 @@ class LoadCells(Device):
 
         if reply is not None:
             return LoadCellEvents(reply.payload)
-      
         return None
 
     def write_enable_events(self, value: LoadCellEvents) -> HarpMessage | None:
